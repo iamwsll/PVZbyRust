@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.15" # now is 25.3.21,but the newest version is 0.16.0-rc.1
-
+rand = "0.9.0"  
 [profile.dev]
 opt-level = 1 #意味开发配置文件时启用少量基本优化
 
