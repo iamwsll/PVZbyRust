@@ -8,10 +8,10 @@ pub fn setup_game(
     game_textures: Res<GameTextures>,
     mut game_grid: ResMut<GameGrid>,
 ) {
-    // 创建游戏背景
-    commands.spawn(SpriteBundle {
+    commands.spawn(Sprite {
         texture: game_textures.backgrounds.get("lawn").unwrap().clone(),
         transform: Transform::from_xyz(0.0, 0.0, 0.0),
+
         ..default()
     });
     
@@ -24,20 +24,18 @@ pub fn setup_game(
 
 fn setup_plant_selector(commands: &mut Commands, game_textures: &Res<GameTextures>) {
     commands
+        // 用 NodeBundle 替换 Node
         .spawn((
-            NodeBundle {
-                style: Style {
+            Node {
+
                     position_type: PositionType::Absolute,
                     left: Val::Px(10.0),
                     top: Val::Px(10.0),
                     width: Val::Px(420.0),
                     height: Val::Px(90.0),
                     flex_direction: FlexDirection::Row,
+                    // background_color: BackgroundColor(Color::rgba(0.3, 0.3, 0.3, 0.7)),
                     ..default()
-                },
-                // 更新背景颜色设置方式
-                background_color: BackgroundColor(Color::rgba(0.3, 0.3, 0.3, 0.7)),
-                ..default()
             },
             PlantSelector,
         ))
@@ -53,49 +51,44 @@ fn setup_plant_selector(commands: &mut Commands, game_textures: &Res<GameTexture
             for plant_type in plant_types.iter() {
                 parent
                     .spawn((
-                        ButtonBundle {
-                            style: Style {
+                        Button ,
+                        Node {
                                 width: Val::Px(70.0),
                                 height: Val::Px(90.0),
                                 margin: UiRect::all(Val::Px(5.0)),
                                 ..default()
-                            },
-                            // 更新背景颜色设置方式
-                            background_color: BackgroundColor(Color::WHITE),
-                            ..default()
                         },
                         Card {
                             plant_type: *plant_type,
                             cooldown: Timer::from_seconds(0.5, TimerMode::Once),
-                        },
+                        }
                     ))
                     .with_children(|parent| {
-                        parent.spawn(ImageBundle {
-                            style: Style {
-                                width: Val::Percent(100.0),
-                                height: Val::Percent(100.0),
+                        parent.spawn(Sprite
+                            {
+                                image: game_textures.cards.get(plant_type).unwrap().clone(),
+                                custom_size: Some(Vec2::new(100.0, 100.0)),
                                 ..default()
-                            },
-                            image: UiImage::new(game_textures.cards.get(plant_type).unwrap().clone()),
-                            ..default()
-                        });
+                            }
+                        );
                         
                         // 显示植物价格
                         parent.spawn(
-                            TextBundle::from_section(
-                                plant_type.cost().to_string(),
-                                TextStyle {
-                                    font_size: 18.0,
-                                    color: Color::BLACK,
-                                    ..default()
-                                },
+                            Text::new(plant_type.cost().to_string())
+                            // from_section(
+                            //     plant_type.cost().to_string(),
+                            //     TextStyle {
+                            //         font_size: 18.0,
+                            //         color: Color::BLACK,
+                            //         ..default()
+                            //     },
                             )
                             .with_style(Style {
                                 position_type: PositionType::Absolute,
                                 right: Val::Px(5.0),
                                 bottom: Val::Px(5.0),
                                 ..default()
-                            }),
+                            };
                         );
                     });
             }
@@ -110,7 +103,6 @@ pub fn plant_placement_system(
     game_textures: Res<GameTextures>,
     mut sun_counter: ResMut<SunCounter>,
     mut game_grid: ResMut<GameGrid>,
-    // 其他需要的资源和组件查询
 ) {
     // 如果点击了左键
     if mouse_button_input.just_pressed(MouseButton::Left) {
@@ -140,7 +132,7 @@ pub fn plant_placement_system(
                         
                         // 创建植物实体
                         let plant_entity = commands.spawn((
-                            SpriteBundle {
+                            Sprite {
                                 texture: game_textures.plants.get(&plant_type).unwrap().clone(),
                                 transform: Transform::from_xyz(
                                     grid_x as f32 * 80.0 - 360.0, 
@@ -198,7 +190,7 @@ pub fn plant_shooting_system(
                 // 如果有僵尸，发射豌豆
                 if has_zombie_in_lane {
                     commands.spawn((
-                        SpriteBundle {
+                        Sprite {
                             texture: game_textures.projectile.clone(),
                             transform: Transform::from_translation(
                                 plant_transform.translation + Vec3::new(30.0, 0.0, 0.0)
@@ -217,6 +209,7 @@ pub fn plant_shooting_system(
 }
 
 // 添加游戏结束设置函数
+// 在 setup_game_over 中用 NodeBundle 替换 Node
 pub fn setup_game_over(
     mut commands: Commands,
     game_textures: Res<GameTextures>,
@@ -230,7 +223,6 @@ pub fn setup_game_over(
             justify_content: JustifyContent::Center,
             ..default()
         },
-        // 更新背景颜色设置方式
         background_color: BackgroundColor(Color::rgba(0.0, 0.0, 0.0, 0.7)),
         ..default()
     })

@@ -7,85 +7,86 @@ use std::time::Duration;
 
 pub fn spawn_zombie_system(
     mut commands: Commands,
-    time: Res<Time>,
     game_textures: Res<GameTextures>,
+    time: Res<Time>,
+    mut spawn_timer: Local<Option<Timer>>,
 ) {
-    // 创建一个计时器作为资源或组件来控制僵尸生成速度
-    // 这里简化处理，每隔一段时间随机生成僵尸
-    let mut rng = rand::thread_rng();
+    // 初始化计时器
+    if spawn_timer.is_none() {
+        *spawn_timer = Some(Timer::from_seconds(5.0, TimerMode::Repeating));
+    }
     
-    if rng.gen_bool(0.005) {  // 每帧有0.5%的几率生成僵尸
-        // 随机选择行
-        let lane = rng.gen_range(0..5);
+    // 更新计时器
+    if let Some(timer) = spawn_timer.as_mut() {
+        timer.tick(time.delta());
         
-        // 随机选择僵尸类型
-        let zombie_type = match rng.gen_range(0..3) {
-            0 => ZombieType::Regular,
-            1 => ZombieType::ConeHead,
-            _ => ZombieType::BucketHead,
-        };
-        
-        // 根据僵尸类型设置不同的生命值
-        let health = match zombie_type {
-            ZombieType::Regular => 100.0,
-            ZombieType::ConeHead => 200.0,
-            ZombieType::BucketHead => 300.0,
-        };
-        
-        // 生成僵尸
-        commands.spawn((
-            SpriteBundle {
-                texture: game_textures.zombies.get(&zombie_type).unwrap().clone(),
-                transform: Transform::from_xyz(400.0, 250.0 - lane as f32 * 100.0, 1.0),
-                ..default()
-            },
-            Zombie {
-                zombie_type,
-                health,
-                speed: 20.0,
-            },
-            GridPosition {
-                x: 9,  // 开始在最右侧
-                y: lane,
-            },
-        ));
+        // 检查是否到达生成时间
+        if timer.just_finished() {
+            // 随机选择一个行
+            let mut rng = rand::thread_rng();
+            let row = rng.gen_range(0..5);
+            
+            // 随机选择一个僵尸类型
+            let zombie_types = [ZombieType::Regular, ZombieType::ConeHead, ZombieType::BucketHead];
+            let zombie_type = zombie_types[rng.gen_range(0..zombie_types.len())];
+            
+            // 生成僵尸
+            commands.spawn((
+                Sprite {
+                    texture: game_textures.zombies.get(&zombie_type).unwrap().clone(),
+                    transform: Transform::from_xyz(450.0, 250.0 - row as f32 * 100.0, 1.0),
+                    ..default()
+                },
+                Zombie {
+                    zombie_type,
+                    health: zombie_type.health(),
+                    speed: zombie_type.speed(),
+                },
+                GridPosition {
+                    x: 9, // 最右侧
+                    y: row,
+                },
+            ));
+        }
     }
 }
 
 pub fn zombie_movement_system(
-    time: Res<Time>,
     mut commands: Commands,
-    mut zombie_query: Query<(Entity, &mut Transform, &mut GridPosition, &Zombie)>,
+    time: Res<Time>,
+    mut query: Query<(Entity, &mut Transform, &mut GridPosition, &Zombie)>,
     plant_query: Query<(Entity, &GridPosition), With<Plant>>,
     mut game_grid: ResMut<GameGrid>,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut game_state: ResMut<NextState<GameState>>,
 ) {
-    for (zombie_entity, mut zombie_transform, mut zombie_grid, zombie) in &mut zombie_query {
-        // 检查当前网格位置是否有植物
-        let mut blocked = false;
+    for (zombie_entity, mut transform, mut grid_pos, zombie) in &mut query {
+        // 移动僵尸
+        transform.translation.x -= zombie.speed * time.delta_seconds();
         
-        for (plant_entity, plant_grid) in &plant_query {
-            if plant_grid.x == zombie_grid.x - 1 && plant_grid.y == zombie_grid.y {
-                blocked = true;
-                // 这里应添加僵尸攻击植物的逻辑
-                break;
-            }
+        // 更新网格位置
+        let new_grid_x = ((transform.translation.x + 400.0) / 80.0).floor() as usize;
+        
+        // 检查是否到达左侧边界
+        if transform.translation.x < -400.0 {
+            // 僵尸到达，游戏结束
+            game_state.set(GameState::GameOver);
+            continue;
         }
         
-        if !blocked {
-            // 向左移动
-            zombie_transform.translation.x -= zombie.speed * time.delta_seconds();
+        // 如果网格位置发生变化
+        if new_grid_x != grid_pos.x && new_grid_x < 9 {
+            // 更新网格位置
+            grid_pos.x = new_grid_x;
             
-            // 更新网格位置（当僵尸移动到新网格时）
-            let new_grid_x = ((zombie_transform.translation.x + 400.0) / 80.0) as usize;
-            if new_grid_x < zombie_grid.x {
-                zombie_grid.x = new_grid_x;
+            // 检查是否与植物碰撞
+            for (plant_entity, plant_grid) in &plant_query {
+                if plant_grid.x == grid_pos.x && plant_grid.y == grid_pos.y {
+                    // 与植物碰撞，僵尸停止移动并攻击植物
+                    commands.entity(plant_entity).despawn();
+                    game_grid.grid[plant_grid.x][plant_grid.y] = None;
+                    break;
+                }
             }
-        }
-        
-        // 检查僵尸是否到达了左侧边缘（游戏结束条件）
-        if zombie_transform.translation.x <= -400.0 {
-            next_state.set(GameState::GameOver);
         }
     }
 }

@@ -1,0 +1,11 @@
+# 最大代码行长度
+max_width = 100
+
+# 是否在空行上保留注释
+retain_empty_lines = true
+
+# 是否在结构体字段之间添加逗号
+struct_field_comma = "always"
+
+# 是否在函数参数之间添加逗号
+fn_params_comma = "always"
