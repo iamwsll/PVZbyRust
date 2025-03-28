@@ -23,6 +23,7 @@ impl Default for SunCounter {
     }
 }
 
+// GameGrid资源用于存储游戏网格的信息
 #[derive(Resource)]
 pub struct GameGrid {
     pub grid: [[Option<Entity>; 5]; 9],

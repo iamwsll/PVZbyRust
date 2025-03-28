@@ -11,7 +11,8 @@ use states::GameState;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, PVZPlugin))
-        .add_state::<GameState>()
+        .add_plugins(DefaultPlugins)
+        .add_plugins(PVZPlugin)
+        // .add_state::<GameState>()
         .run();
 }
