@@ -30,23 +30,23 @@ pub fn spawn_zombie_system(
             let zombie_types = [ZombieType::Regular, ZombieType::ConeHead, ZombieType::BucketHead];
             let zombie_type = zombie_types[rng.gen_range(0..zombie_types.len())];
             
-            // 生成僵尸
-            commands.spawn((
-                Sprite {
-                    texture: game_textures.zombies.get(&zombie_type).unwrap().clone(),
-                    transform: Transform::from_xyz(450.0, 250.0 - row as f32 * 100.0, 1.0),
-                    ..default()
-                },
-                Zombie {
-                    zombie_type,
-                    health: zombie_type.health(),
-                    speed: zombie_type.speed(),
-                },
-                GridPosition {
-                    x: 9, // 最右侧
-                    y: row,
-                },
-            ));
+            // // 生成僵尸
+            // commands.spawn((
+            //     Sprite {
+            //         texture: game_textures.zombies.get(&zombie_type).unwrap().clone(),
+            //         transform: Transform::from_xyz(450.0, 250.0 - row as f32 * 100.0, 1.0),
+            //         ..default()
+            //     },
+            //     Zombie {
+            //         zombie_type,
+            //         health: zombie_type.health(),
+            //         speed: zombie_type.speed(),
+            //     },
+            //     GridPosition {
+            //         x: 9, // 最右侧
+            //         y: row,
+            //     },
+            // ));
         }
     }
 }
@@ -61,7 +61,7 @@ pub fn zombie_movement_system(
 ) {
     for (zombie_entity, mut transform, mut grid_pos, zombie) in &mut query {
         // 移动僵尸
-        transform.translation.x -= zombie.speed * time.delta_seconds();
+        // transform.translation.x -= zombie.speed * time.delta_seconds();
         
         // 更新网格位置
         let new_grid_x = ((transform.translation.x + 400.0) / 80.0).floor() as usize;

@@ -53,11 +53,11 @@ pub fn load_game_textures(mut game_textures: ResMut<GameTextures>, asset_server:
     // 加载植物贴图
     game_textures.plants.insert(
         PlantType::Peashooter,
-        asset_server.load("images/plants/peashooter.png"),
+        asset_server.load("images/Peashooter.png"),
     );
     game_textures.plants.insert(
         PlantType::Sunflower,
-        asset_server.load("images/plants/sunflower.png"),
+        asset_server.load("images/SunFlower.png"),
     );
     game_textures.plants.insert(
         PlantType::WallNut,
