@@ -1,13 +1,13 @@
-use ggez::{Context, GameResult};
-use ggez::graphics::{self, Color, DrawParam, Image};
-use ggez::event::EventHandler;
-use ggez::input::mouse::MouseButton;
-use std::time::Duration;
-use crate::resources::Resources;
-use crate::plant::{Plant, PlantType};
-use crate::zombie::{Zombie, ZombieType};
-use crate::sun::Sun;
 use crate::grid::Grid;
+use crate::plant::{Plant, PlantType};
+use crate::resources::Resources;
+use crate::sun::Sun;
+use crate::zombie::{Zombie, ZombieType};
+use ggez::event::EventHandler;
+use ggez::graphics::{self, Color, DrawParam, Image};
+use ggez::input::mouse::MouseButton;
+use ggez::{Context, GameResult};
+use std::time::Duration;
 
 // 游戏状态
 pub struct GameState {
@@ -56,8 +56,7 @@ impl GameState {
         if let Some(plant_type) = &self.selected_plant {
             if let Some((grid_x, grid_y)) = self.grid.get_grid_position(x, y) {
                 // 检查是否已有植物
-                if !self.grid.is_occupied(grid_x, grid_y) && 
-                   self.sun_count >= plant_type.cost() {
+                if !self.grid.is_occupied(grid_x, grid_y) && self.sun_count >= plant_type.cost() {
                     let plant = Plant::new(*plant_type, grid_x, grid_y);
                     self.plants.push(plant);
                     self.sun_count -= plant_type.cost();
@@ -75,37 +74,40 @@ impl EventHandler for GameState {
         const DESIRED_FPS: u32 = 60;
         const MILLIS_PER_UPDATE: u64 = 1000 / DESIRED_FPS as u64;
         let dt = ggez::timer::delta(ctx).as_millis() as u64;
-        
-        // 更新僵尸
-        for zombie in &mut self.zombies {
-            zombie.update(dt);
+        //以每秒DESIRED_FPS帧的速度更新游戏状态
+        while ggez::timer::check_update_time(ctx, DESIRED_FPS) {
+            if !self.game_over {
+                // // 更新僵尸
+                // for zombie in &mut self.zombies {
+                //     zombie.update(dt);
+                // }
+
+                // // 更新植物
+                // for plant in &mut self.plants {
+                //     plant.update(dt);
+                // }
+
+                // 更新阳光
+                for sun in &mut self.suns {
+                    sun.update(dt);
+                }
+
+                // // 生成僵尸逻辑
+                // self.spawn_timer += ggez::timer::delta(ctx);
+                // if self.spawn_timer.as_secs() >= 20 {
+                //     self.spawn_zombie();
+                //     self.spawn_timer = Duration::from_secs(0);
+                // }
+
+                // 随机生成阳光
+                if rand::random::<u32>() % 300 == 0 {
+                    self.spawn_sun();
+                }
+
+                // 碰撞检测和游戏逻辑
+                // ...
+            }
         }
-        
-        // 更新植物
-        for plant in &mut self.plants {
-            plant.update(dt);
-        }
-        
-        // 更新阳光
-        for sun in &mut self.suns {
-            sun.update(dt);
-        }
-        
-        // 生成僵尸逻辑
-        self.spawn_timer += ggez::timer::delta(ctx);
-        if self.spawn_timer.as_secs() >= 20 {
-            self.spawn_zombie();
-            self.spawn_timer = Duration::from_secs(0);
-        }
-        
-        // 随机生成阳光
-        if rand::random::<u32>() % 300 == 0 {
-            self.spawn_sun();
-        }
-        
-        // 碰撞检测和游戏逻辑
-        // ...
-        
         Ok(())
     }
 
@@ -141,13 +143,7 @@ impl EventHandler for GameState {
         Ok(())
     }
 
-    fn mouse_button_down_event(
-        &mut self,
-        _ctx: &mut Context,
-        button: MouseButton,
-        x: f32,
-        y: f32,
-    ) {
+    fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
         if self.game_over {
             return;
         }

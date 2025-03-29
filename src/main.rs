@@ -10,11 +10,10 @@ mod zombie;
 mod sun;
 mod grid;
 
-const WINDOW_WIDTH: f32 = 800.0;
+const WINDOW_WIDTH: f32 = 1400.0;
 const WINDOW_HEIGHT: f32 = 600.0;
 
 fn main() -> GameResult {
-    // 根据 CARGO_MANIFEST_DIR 设置资源目录
     let resource_dir = if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
         let mut path = PathBuf::from(manifest_dir);
         path.push("Resource");
@@ -23,7 +22,7 @@ fn main() -> GameResult {
         PathBuf::from("./Resource")
     };
 
-    let (mut ctx, event_loop) = ContextBuilder::new("pvz_rust", "game_author")
+    let (mut ctx, event_loop) = ContextBuilder::new("pvz_rust", "wsll")
         .add_resource_path(resource_dir)
         .window_setup(WindowSetup::default().title("植物大战僵尸 - Rust版"))
         .window_mode(WindowMode::default().dimensions(WINDOW_WIDTH, WINDOW_HEIGHT))
