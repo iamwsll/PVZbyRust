@@ -1,7 +1,7 @@
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, DrawParam};
 use crate::resources::Resources;
-
+use crate::grid::{GRID_START_X, GRID_START_Y, GRID_CELL_HEIGHT,GRID_CELL_WIDTH};
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PlantType {
     Peashooter,
@@ -24,8 +24,10 @@ pub struct Plant {
     grid_x: usize,
     grid_y: usize,
     health: i32,
+    // 动画帧 目前没用?
     animation_frame: usize,
     animation_timer: u64,
+    //这个冷却时间是指如豌豆射手的发射时间间隔
     cooldown: u64,
     cooldown_timer: u64,
 }
@@ -34,7 +36,7 @@ impl Plant {
     pub fn new(plant_type: PlantType, grid_x: usize, grid_y: usize) -> Self {
         let health = match plant_type {
             PlantType::Peashooter => 300,
-            PlantType::Sunflower => 200,
+            PlantType::Sunflower => 300,
             PlantType::WallNut => 1500,
         };
 
@@ -77,13 +79,14 @@ impl Plant {
     }
 
     pub fn draw(&self, ctx: &mut Context, resources: &Resources) -> GameResult {
-        let x = 80.0 + (self.grid_x as f32) * 80.0;
-        let y = 80.0 + (self.grid_y as f32) * 80.0;
+        // 计算植物在屏幕上的位置,最后一项是偏移量
+        let x = GRID_START_X + (self.grid_x as f32) * GRID_CELL_WIDTH + GRID_CELL_WIDTH / 4.0;
+        let y = GRID_START_Y + (self.grid_y as f32) * GRID_CELL_HEIGHT+ GRID_CELL_HEIGHT / 4.0;
 
         let image = match self.plant_type {
             PlantType::Peashooter => &resources.peashooter_images[self.animation_frame],
             PlantType::Sunflower => &resources.sunflower_images[self.animation_frame],
-            _ => &resources.peashooter_images[0], // 临时使用，应该为每种植物添加图片
+            PlantType::WallNut => &resources.wallnut_images[self.animation_frame],
         };
 
         graphics::draw(

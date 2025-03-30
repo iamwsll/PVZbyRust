@@ -45,7 +45,7 @@ impl Sun {
     }
 
     pub fn contains_point(&self, x: f32, y: f32) -> bool {
-        let radius = 20.0; // 阳光的点击半径
+        let radius = 40.0; // 阳光的点击半径
         let dx = self.x + radius - x;
         let dy = self.y + radius - y;
         dx * dx + dy * dy <= radius * radius

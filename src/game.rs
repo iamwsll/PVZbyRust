@@ -1,8 +1,9 @@
-use crate::grid::Grid;
+use crate::grid::{Grid, GRID_START_X, GRID_START_Y, GRID_CELL_HEIGHT,GRID_CELL_WIDTH, GRID_WIDTH, GRID_HEIGHT};
 use crate::plant::{Plant, PlantType};
 use crate::resources::Resources;
 use crate::sun::Sun;
 use crate::zombie::{Zombie, ZombieType};
+use crate::shop::Shop;  // 添加Shop导入
 use ggez::event::EventHandler;
 use ggez::graphics::{self, Color, DrawParam, Image};
 use ggez::input::mouse::MouseButton;
@@ -20,12 +21,14 @@ pub struct GameState {
     spawn_timer: Duration,
     selected_plant: Option<PlantType>,
     game_over: bool,
+    shop: Shop,
 }
 
 impl GameState {
     pub fn new(ctx: &mut Context) -> GameResult<GameState> {
         let resources = Resources::new(ctx)?;
         let grid = Grid::new();
+        let shop = Shop::new();  // 初始化商店
 
         Ok(GameState {
             resources,
@@ -37,6 +40,7 @@ impl GameState {
             spawn_timer: Duration::from_secs(0),
             selected_plant: None,
             game_over: false,
+            shop,  
         })
     }
 
@@ -61,6 +65,11 @@ impl GameState {
                     self.plants.push(plant);
                     self.sun_count -= plant_type.cost();
                     self.grid.occupy(grid_x, grid_y);
+                    
+                    // 放置植物后取消选择状态
+                    self.selected_plant = None;
+                    self.shop.selected_plant = None;
+                    
                     return true;
                 }
             }
@@ -74,38 +83,21 @@ impl EventHandler for GameState {
         const DESIRED_FPS: u32 = 60;
         const MILLIS_PER_UPDATE: u64 = 1000 / DESIRED_FPS as u64;
         let dt = ggez::timer::delta(ctx).as_millis() as u64;
-        //以每秒DESIRED_FPS帧的速度更新游戏状态
+
         while ggez::timer::check_update_time(ctx, DESIRED_FPS) {
             if !self.game_over {
-                // // 更新僵尸
-                // for zombie in &mut self.zombies {
-                //     zombie.update(dt);
-                // }
-
-                // // 更新植物
-                // for plant in &mut self.plants {
-                //     plant.update(dt);
-                // }
-
                 // 更新阳光
                 for sun in &mut self.suns {
                     sun.update(dt);
                 }
 
-                // // 生成僵尸逻辑
-                // self.spawn_timer += ggez::timer::delta(ctx);
-                // if self.spawn_timer.as_secs() >= 20 {
-                //     self.spawn_zombie();
-                //     self.spawn_timer = Duration::from_secs(0);
-                // }
-
-                // 随机生成阳光
+                // 随机生成阳光 这里可以根据需要调整生成频率
                 if rand::random::<u32>() % 300 == 0 {
                     self.spawn_sun();
                 }
 
-                // 碰撞检测和游戏逻辑
-                // ...
+                // 更新商店
+                self.shop.update(self.sun_count);
             }
         }
         Ok(())
@@ -117,6 +109,10 @@ impl EventHandler for GameState {
         // 绘制背景
         let bg = &self.resources.background;
         graphics::draw(ctx, bg, DrawParam::default())?;
+        
+        // 绘制商店面板到画面最上方
+        let shop = &self.resources.shop_image;
+        graphics::draw(ctx, shop, DrawParam::default().dest([250.0, 0.0]))?;
 
         // 绘制网格（可选）
         self.grid.draw(ctx)?;
@@ -136,8 +132,21 @@ impl EventHandler for GameState {
             sun.draw(ctx, &self.resources)?;
         }
 
-        // 绘制UI
-        // ...
+        // 绘制商店卡片
+        self.shop.draw(ctx, &self.resources)?;
+        
+        // 绘制阳光数量
+        let sun_text = graphics::Text::new(
+            graphics::TextFragment::new(format!("{}", self.sun_count))
+                .color(Color::BLACK)
+                .scale(25.0)
+        );
+        
+        graphics::draw(
+            ctx,
+            &sun_text,
+            DrawParam::default().dest([220.0, 30.0])
+        )?;
 
         graphics::present(ctx)?;
         Ok(())
@@ -159,12 +168,18 @@ impl EventHandler for GameState {
                 }
             });
 
-            // 放置植物
-            if x >= 40.0 && x <= 740.0 && y >= 80.0 && y <= 480.0 {
-                self.place_plant(x, y);
+            // 处理植物放置逻辑
+            if self.selected_plant.is_some() {
+                if x >= GRID_START_X && x <= GRID_START_X + GRID_CELL_WIDTH * GRID_WIDTH as f32 && 
+                   y >= GRID_START_Y && y <= GRID_START_Y + GRID_CELL_HEIGHT * GRID_HEIGHT as f32 {
+                    self.place_plant(x, y);
+                }
+            } else {
+                // 处理商店卡片点击
+                if let Some(plant_type) = self.shop.handle_click(x, y, self.sun_count) {
+                    self.selected_plant = Some(plant_type);
+                }
             }
-            // 选择植物逻辑
-            // ...
         }
     }
 }

@@ -9,9 +9,11 @@ mod plant;
 mod zombie;
 mod sun;
 mod grid;
+mod shop;  // 添加shop模块
 
-const WINDOW_WIDTH: f32 = 1400.0;
-const WINDOW_HEIGHT: f32 = 600.0;
+// 设计时的窗口尺寸，作为缩放参考基准
+pub const DESIGN_WIDTH: f32 = 1400.0;
+pub const DESIGN_HEIGHT: f32 = 600.0;
 
 fn main() -> GameResult {
     let resource_dir = if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
@@ -25,7 +27,10 @@ fn main() -> GameResult {
     let (mut ctx, event_loop) = ContextBuilder::new("pvz_rust", "wsll")
         .add_resource_path(resource_dir)
         .window_setup(WindowSetup::default().title("植物大战僵尸 - Rust版"))
-        .window_mode(WindowMode::default().dimensions(WINDOW_WIDTH, WINDOW_HEIGHT))
+        .window_mode(WindowMode::default()
+            .dimensions(DESIGN_WIDTH, DESIGN_HEIGHT)
+            // .resizable(true) // 设置窗口可调整大小
+            )
         .build()?;
 
     let game_state = game::GameState::new(&mut ctx)?;
