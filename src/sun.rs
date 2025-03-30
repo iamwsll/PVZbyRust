@@ -8,6 +8,8 @@ pub struct Sun {
     target_y: f32,
     speed: f32,
     lifetime: u64,
+    animation_frame: usize,    // 当前动画帧索引
+    animation_timer: u64,      // 动画计时器
 }
 
 impl Sun {
@@ -20,6 +22,8 @@ impl Sun {
             target_y,
             speed: 0.5,
             lifetime: 0,
+            animation_frame: 0,
+            animation_timer: 0,
         }
     }
 
@@ -32,12 +36,19 @@ impl Sun {
         }
 
         self.lifetime += dt;
+        
+        // 添加动画帧更新逻辑，支持22帧
+        self.animation_timer += dt;
+        if self.animation_timer > 50 {  // 缩短切换时间使动画更流畅
+            self.animation_frame = (self.animation_frame + 1) % 22;  // 在22帧之间循环
+            self.animation_timer = 0;
+        }
     }
 
     pub fn draw(&self, ctx: &mut Context, resources: &Resources) -> GameResult {
         graphics::draw(
             ctx,
-            &resources.sun_image,
+            &resources.sun_images[self.animation_frame],  // 使用当前动画帧
             DrawParam::default()
                 .dest([self.x, self.y])
                 .scale([0.6, 0.6]),

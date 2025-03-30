@@ -114,7 +114,7 @@ impl EventHandler for GameState {
         let shop = &self.resources.shop_image;
         graphics::draw(ctx, shop, DrawParam::default().dest([250.0, 0.0]))?;
 
-        // 绘制网格（可选）
+        // 绘制网格（调试用）
         self.grid.draw(ctx)?;
 
         // 绘制植物

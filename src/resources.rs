@@ -9,7 +9,7 @@ pub struct Resources {
     pub sunflower_images: Vec<Image>,
     pub wallnut_images: Vec<Image>, // 添加坚果墙图片
     pub zombie_images: Vec<Image>,
-    pub sun_image: Image,
+    pub sun_images: Vec<Image>,  // 改为数组以支持动画
     // 添加植物卡片图像
     pub peashooter_card: Image,
     pub sunflower_card: Image,
@@ -18,6 +18,14 @@ pub struct Resources {
 
 impl Resources {
     pub fn new(ctx: &mut Context) -> GameResult<Resources> {
+        // 创建一个向量来存储阳光的所有帧
+        let mut sun_images = Vec::with_capacity(22);
+        
+        // 循环加载22帧阳光图片
+        for i in 0..=21 {
+            sun_images.push(Image::new(ctx, &format!("/other_image/sun/Sun{}.png", i))?);
+        }
+        
         Ok(Resources {
             background: Image::new(ctx, "/other_image/Background.png")?,
             shop_image: Image::new(ctx, "/other_image/Shop.png")?,
@@ -37,7 +45,7 @@ impl Resources {
                 // Image::new(ctx, "../../Resource/zombies/zombie1.png")?,
                 // Image::new(ctx, "../../Resource/zombies/zombie2.png")?,
             ],
-            sun_image: Image::new(ctx, "/other_image/Button.png")?,
+            sun_images, // 使用加载的22帧图片
             
             // 加载植物卡片图像
             peashooter_card: Image::new(ctx, "/plants/Peashooter.png")?,
