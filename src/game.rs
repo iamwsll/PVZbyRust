@@ -114,25 +114,25 @@ impl EventHandler for GameState {
                 }
                 self.suns.append(&mut new_suns); // Add newly generated suns
 
-                // 更新僵尸
-                for zombie in &mut self.zombies {
-                    zombie.update(dt);
-                }
+                // // 更新僵尸
+                // for zombie in &mut self.zombies {
+                //     zombie.update(dt);
+                // }
 
-                // 检查僵尸是否到达左侧边界 (游戏结束条件)
-                for zombie in &self.zombies {
-                    if zombie.get_x() < GRID_START_X - 50.0 { // Give some buffer
-                        println!("Zombies reached your house! Game Over!");
-                        self.game_over = true;
-                        break; // Exit loop once game is over
-                    }
-                }
+                // // 检查僵尸是否到达左侧边界 (游戏结束条件)
+                // for zombie in &self.zombies {
+                //     if zombie.get_x() < GRID_START_X - 50.0 { // Give some buffer
+                //         println!("Zombies reached your house! Game Over!");
+                //         self.game_over = true;
+                //         break; // Exit loop once game is over
+                //     }
+                // }
                 if self.game_over { continue; } // Skip rest of update if game over
 
 
-                // 移除死亡的植物和僵尸 (示例，需要更完善的碰撞和生命值处理)
-                self.plants.retain(|plant| plant.is_alive());
-                self.zombies.retain(|zombie| zombie.is_alive());
+                // // 移除死亡的植物和僵尸 (示例，需要更完善的碰撞和生命值处理)
+                // self.plants.retain(|plant| plant.is_alive());
+                // self.zombies.retain(|zombie| zombie.is_alive());
 
                 // TODO: 添加碰撞检测和处理逻辑 (植物 vs 僵尸, 子弹 vs 僵尸)
 
@@ -142,12 +142,12 @@ impl EventHandler for GameState {
                     self.spawn_sun();
                 }
 
-                // 定时生成僵尸
-                let now = Instant::now();
-                if now.duration_since(self.last_zombie_spawn_time) >= self.zombie_spawn_interval {
-                    self.spawn_zombie();
-                    self.last_zombie_spawn_time = now; // Reset the timer
-                }
+                // // 定时生成僵尸
+                // let now = Instant::now();
+                // if now.duration_since(self.last_zombie_spawn_time) >= self.zombie_spawn_interval {
+                //     self.spawn_zombie();
+                //     self.last_zombie_spawn_time = now; // Reset the timer
+                // }
 
 
                 // 更新商店
@@ -168,18 +168,18 @@ impl EventHandler for GameState {
         let shop_img = &self.resources.shop_image; // Use the correct variable name
         graphics::draw(ctx, shop_img, DrawParam::default().dest([250.0, 0.0]))?;
 
-        // 绘制网格（调试用）
-        // self.grid.draw(ctx)?; // Uncomment to see grid lines
+        //绘制网格（调试用）
+        self.grid.draw(ctx)?; // Uncomment to see grid lines
 
         // 绘制植物
         for plant in &self.plants {
             plant.draw(ctx, &self.resources)?;
         }
 
-        // 绘制僵尸
-        for zombie in &self.zombies {
-            zombie.draw(ctx, &self.resources)?;
-        }
+        // // 绘制僵尸
+        // for zombie in &self.zombies {
+        //     zombie.draw(ctx, &self.resources)?;
+        // }
 
         // 绘制阳光
         for sun in &self.suns {

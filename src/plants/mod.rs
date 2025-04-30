@@ -2,7 +2,7 @@ use ggez::{Context, GameResult};
 use ggez::graphics::{self, DrawParam};
 use crate::resources::Resources;
 use crate::grid::{GRID_START_X, GRID_START_Y, GRID_CELL_HEIGHT,GRID_CELL_WIDTH};
-use crate::sun::Sun; // 保持 Sun 导入
+use crate::sun::Sun;
 
 // Declare submodules and import their update functions
 pub mod peashooter;
@@ -70,8 +70,17 @@ impl Plant {
     pub fn update(&mut self, dt: u64, suns: &mut Vec<Sun>) {
         // 动画更新 (通用逻辑)
         self.animation_timer += dt;
-        if self.animation_timer > 200 { // 动画速度可以考虑植物特定化
-            self.animation_frame = (self.animation_frame + 1) % 2; // 假设目前只有2帧
+        if self.animation_timer > 100 { // 调整动画速度 (e.g., 100ms per frame)
+            // 根据植物类型确定动画帧数
+            let frame_count = match self.plant_type {
+                PlantType::Sunflower => 18, // 向日葵有18帧
+                PlantType::Peashooter => 13, // 豌豆射手13帧
+                PlantType::WallNut => 16,   // 坚果墙16帧
+                // 如果未来添加更多植物，在这里添加它们的帧数
+            };
+            if frame_count > 0 {
+                self.animation_frame = (self.animation_frame + 1) % frame_count;
+            }
             self.animation_timer = 0;
         }
 
@@ -101,36 +110,45 @@ impl Plant {
         let x = GRID_START_X + (self.grid_x as f32) * GRID_CELL_WIDTH + GRID_CELL_WIDTH / 4.0;
         let y = GRID_START_Y + (self.grid_y as f32) * GRID_CELL_HEIGHT+ GRID_CELL_HEIGHT / 4.0;
 
-        // Get the correct image based on type and state (Potentially delegate?)
-        // For now, keep the simple frame logic here
-        let image = match self.plant_type {
-             // TODO: Potentially delegate image selection to submodules for complex animations (e.g., WallNut damage)
+        // Get the correct image based on type and state
+        let image: &graphics::ImageGeneric<graphics::GlBackendSpec> = match self.plant_type {
             PlantType::Peashooter => {
                 let frame_count = resources.peashooter_images.len();
                 if frame_count > 0 {
                     &resources.peashooter_images[self.animation_frame % frame_count]
                 } else {
-                    // 如果没有图片，返回一个错误或默认图片
-                    // 这里暂时 panic，因为资源未加载是严重错误
-                    panic!("Peashooter images not loaded!");
+                    // Fallback or error for Peashooter
+                    // Using sunflower card as a temporary visible placeholder if peashooter fails
+                    println!("Warning: Peashooter images not loaded or empty!");
+                    &resources.sunflower_card // Placeholder
                 }
             },
             PlantType::Sunflower => {
                 let frame_count = resources.sunflower_images.len();
                 if frame_count > 0 {
-                    &resources.sunflower_images[self.animation_frame % frame_count] // 使用模运算防止越界
+                    // Ensure animation_frame doesn't exceed available frames
+                    &resources.sunflower_images[self.animation_frame % frame_count]
                 } else {
-                    panic!("Sunflower images not loaded!");
+                    // Fallback or error for Sunflower
+                    println!("Warning: Sunflower images not loaded or empty!");
+                    &resources.sunflower_card // Use card as fallback
                 }
             },
             PlantType::WallNut => {
                 let frame_count = resources.wallnut_images.len();
                 if frame_count > 0 {
-                    &resources.wallnut_images[self.animation_frame % frame_count] // 使用模运算防止越界
+                    &resources.wallnut_images[self.animation_frame % frame_count]
                 } else {
-                    panic!("WallNut images not loaded!");
+                    // Fallback or error for WallNut
+                    println!("Warning: WallNut images not loaded or empty!");
+                    &resources.wallnut_card // Placeholder
                 }
             },
+            _ => {
+                // Fallback for unknown plant types
+                println!("Warning: Unknown plant type or images not loaded!");
+                &resources.sunflower_card // Use sunflower card as a fallback
+            }
         };
 
         graphics::draw(

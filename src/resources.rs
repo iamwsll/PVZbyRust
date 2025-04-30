@@ -2,6 +2,7 @@ use ggez::graphics::{Image, Font};
 use ggez::{Context, GameResult};
 use std::collections::HashMap; // Keep HashMap if needed for other resources
 use std::path::Path;
+use std::vec;
 
 pub struct Resources {
     // Background and UI
@@ -18,7 +19,7 @@ pub struct Resources {
     pub wallnut_card: Image,
 
     // Zombie Images (Add different states)
-    pub zombie_walk_images: Vec<Image>, // For walking animation
+    // pub zombie_walk_images: Vec<Image>, // For walking animation
     // pub zombie_attack_images: Vec<Image>, // Future: For attacking animation
     // pub zombie_die_images: Vec<Image>, // Future: For dying animation
     // Add images for other zombie types (Conehead, Buckethead) here...
@@ -47,42 +48,66 @@ impl Resources {
                  println!("Warning: Sun image not found: {}", path);
             }
         }
-         if sun_images.is_empty() {
-             println!("Warning: No sun images loaded. Using fallback.");
-             // Add a fallback mechanism if needed, e.g., load a default image or use a colored rect
-             // For now, we'll let it potentially panic later if used without images.
-         }
+
+        // Load plant images
+        let mut peashooter_images = Vec::new(); // Placeholder for Peashooter images
+        for i in 1..=13 { // Loop from 1 to 13
+            let path = format!("/plants/Peashooter/{}.png", i);
+            // Check if the file exists before trying to load it
+            // Note: Adjust the base path ("Resource") if your structure differs
+            if Path::new("Resource").join(path.trim_start_matches('/')).exists() {
+                 match Image::new(ctx, &path) {
+                     Ok(img) => peashooter_images.push(img),
+                     Err(e) => println!("Warning: Failed to load peashooter image {}: {}", path, e),
+                 }
+            } else {
+                 println!("Warning: Peashooter image not found: {}", path);
+            }
+        }
+
+        let mut sunflower_images = Vec::new();
+        for i in 1..=18 { // Loop from 1 to 18
+            let path = format!("/plants/SunFlower/{}.png", i);
+            // Check if the file exists before trying to load it
+            // Note: Adjust the base path ("Resource") if your structure differs
+            if Path::new("Resource").join(path.trim_start_matches('/')).exists() {
+                 match Image::new(ctx, &path) {
+                     Ok(img) => sunflower_images.push(img),
+                     Err(e) => println!("Warning: Failed to load sunflower image {}: {}", path, e),
+                 }
+            } else {
+                 println!("Warning: Sunflower image not found: {}", path);
+            }
+        }
 
 
-        // Load plant images (assuming simple animation or single frame for now)
-        // TODO: Load proper animation sequences if available
-        let peashooter_images = vec![
-            Image::new(ctx, "/plants/Peashooter.gif")?, // Assuming GIF might load first frame or need specific handling
-            // Add more frames if available, e.g., Image::new(ctx, "/plants/Peashooter_frame2.png")?
-        ];
-        let sunflower_images = vec![
-            Image::new(ctx, "/plants/SunFlower.gif")?,
-             // Add more frames...
-        ];
-        let wallnut_images = vec![
-            Image::new(ctx, "/plants/WallNut.gif")?,
-            // Add more frames for damaged states...
-            // Image::new(ctx, "/plants/WallNut1.gif")?,
-            // Image::new(ctx, "/plants/WallNut2.gif")?,
-        ];
+        let mut wallnut_images = Vec::new();
+        for i in 1..=16 { // Loop from 1 to 16 (assuming only one image)
+            let path = format!("/plants/WallNut/WallnutFull/{}.png", i);
+            // Check if the file exists before trying to load it
+            // Note: Adjust the base path ("Resource") if your structure differs
+            if Path::new("Resource").join(path.trim_start_matches('/')).exists() {
+                 match Image::new(ctx, &path) {
+                     Ok(img) => wallnut_images.push(img),
+                     Err(e) => println!("Warning: Failed to load wallnut image {}: {}", path, e),
+                 }
+            } else {
+                 println!("Warning: Wallnut image not found: {}", path);
+            }
+        }
 
         // Load plant cards
-        let peashooter_card = Image::new(ctx, "/plants/Peashooter.png")?; // Assuming card uses the static PNG
+        let peashooter_card = Image::new(ctx, "/plants/Peashooter.png")?;
         let sunflower_card = Image::new(ctx, "/plants/SunFlower.png")?;
         let wallnut_card = Image::new(ctx, "/plants/WallNut.png")?;
 
 
-        // Load zombie images
-        // TODO: Load proper animation sequences
-        let zombie_walk_images = vec![
-            Image::new(ctx, "/zombies/ZombieWalk1.gif")?,
-            Image::new(ctx, "/zombies/ZombieWalk2.gif")?,
-        ];
+        // // Load zombie images
+        // // TODO: Load proper animation sequences
+        // let zombie_walk_images = vec![
+        //     Image::new(ctx, "/zombies/ZombieWalk1.gif")?,
+        //     Image::new(ctx, "/zombies/ZombieWalk2.gif")?,
+        // ];
         // let zombie_attack_images = vec![Image::new(ctx, "/zombies/ZombieAttack.gif")?];
         // let zombie_die_images = vec![Image::new(ctx, "/zombies/ZombieDie.gif")?];
 
@@ -97,9 +122,10 @@ impl Resources {
             peashooter_card,
             sunflower_card,
             wallnut_card,
-            zombie_walk_images,
+            // zombie_walk_images, // Keep commented if not loaded yet
             // zombie_attack_images,
             // zombie_die_images,
+            // Assign other potentially unloaded Vecs as empty or handle appropriately
         })
     }
 }
