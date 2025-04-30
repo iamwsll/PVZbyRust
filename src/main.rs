@@ -5,15 +5,16 @@ use ggez::event::{self, EventHandler};
 
 mod game;
 mod resources;
-mod plant;
-mod zombie;
+mod plants;
+mod zombies; // Add zombies module
 mod sun;
 mod grid;
-mod shop;  // 添加shop模块
+mod shop;
 
 // 设计时的窗口尺寸，作为缩放参考基准
 pub const DESIGN_WIDTH: f32 = 1400.0;
 pub const DESIGN_HEIGHT: f32 = 600.0;
+
 
 fn main() -> GameResult {
     let resource_dir = if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
@@ -29,7 +30,7 @@ fn main() -> GameResult {
         .window_setup(WindowSetup::default().title("植物大战僵尸 - Rust版"))
         .window_mode(WindowMode::default()
             .dimensions(DESIGN_WIDTH, DESIGN_HEIGHT)
-            // .resizable(true) // 设置窗口可调整大小
+            // .resizable(true)
             )
         .build()?;
 

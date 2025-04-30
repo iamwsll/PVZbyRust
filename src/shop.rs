@@ -1,16 +1,16 @@
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, DrawParam, Color, Rect};
 use ggez::input::mouse::MouseButton;
-use crate::plant::PlantType;
+use crate::plants::PlantType;
 use crate::resources::Resources;
 use std::time::{Duration, Instant};
 
 // 卡片在商店中的尺寸
-const CARD_WIDTH: f32 = 50.0;
-const CARD_HEIGHT: f32 = 80.0;
-const SHOP_START_X: f32 = 325.0;
-const SHOP_START_Y: f32 = 8.0;
-const CARD_SPACING: f32 = 10.0;
+pub const CARD_WIDTH: f32 = 50.0;
+pub const CARD_HEIGHT: f32 = 80.0;
+pub const SHOP_START_X: f32 = 325.0;
+pub const SHOP_START_Y: f32 = 8.0;
+pub const CARD_SPACING: f32 = 10.0;
 
 // 卡片冷却时间（毫秒）
 const COOLDOWN_TIMES: [u64; 3] = [
