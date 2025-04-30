@@ -36,7 +36,7 @@ impl Zombie {
         Zombie {
             zombie_type,
             row,
-            x: 800.0, // 从屏幕更右侧开始，确保完全在屏幕外生成
+            x: 950.0, // 从屏幕更右侧开始，确保完全在屏幕外生成
             health,
             speed,
             animation_frame: 0,
@@ -50,7 +50,7 @@ impl Zombie {
         self.animation_timer += dt;
         if self.animation_timer > 200 { // 动画切换速度
             // TODO: 根据僵尸类型和状态（行走/攻击）选择不同的动画帧范围
-            let frame_count = 2; // 假设行走动画有2帧
+            let frame_count = 22; // 22帧
             self.animation_frame = (self.animation_frame + 1) % frame_count;
             self.animation_timer = 0;
         }
@@ -69,34 +69,35 @@ impl Zombie {
         // TODO: 添加攻击逻辑检查 (当僵尸遇到植物时，设置 attacking = true)
     }
 
-    // pub fn draw(&self, ctx: &mut Context, resources: &Resources) -> GameResult {
-    //     // 计算僵尸在屏幕上的 Y 坐标 (通用逻辑)
-    //     // 需要根据实际网格和僵尸图像调整 Y 坐标和偏移量
-    //     let y = crate::grid::GRID_START_Y + (self.row as f32) * crate::grid::GRID_CELL_HEIGHT + 15.0; // 示例 Y 坐标
+    pub fn draw(&self, ctx: &mut Context, resources: &Resources) -> GameResult {
+        // 计算僵尸在屏幕上的 Y 坐标 (通用逻辑)
+        // 需要根据实际网格和僵尸图像调整 Y 坐标和偏移量
+        let y = crate::grid::GRID_START_Y + (self.row as f32) * crate::grid::GRID_CELL_HEIGHT - crate::grid::GRID_CELL_HEIGHT/4.0; // 示例 Y 坐标
 
-    //     // 根据僵尸类型和状态选择图像 (未来可以更复杂)
-    //     let image = match self.zombie_type {
-    //         ZombieType::Normal => {
-    //             // TODO: 根据 attacking 状态选择行走或攻击动画
-    //             // 目前只使用行走动画
-    //             let images = &resources.zombie_walk_images; // 假设有一个行走动画序列
-    //             if !images.is_empty() {
-    //                 &images[self.animation_frame % images.len()]
-    //             } else {
-    //                 panic!("Normal zombie walk images not loaded!");
-    //             }
-    //         }
-    //         // Handle other zombie types...
-    //     };
+        // 根据僵尸类型和状态选择图像 (未来可以更复杂)
+        let image = match self.zombie_type {
+            ZombieType::Normal => {
+                // TODO: 根据 attacking 状态选择行走或攻击动画
+                // 目前只使用行走动画
+                let frame_count = resources.zombiesWalk1_images.len();
+                if frame_count > 0 {
+                    &resources.zombiesWalk1_images[self.animation_frame % frame_count]
+                } else {
+                    println!("No images available for Normal Zombie");
+                    &resources.zombiesWalk1_images[0] // 返回默认图像或处理错误
+                }
+            }
+            // Handle other zombie types...
+        };
 
-    //     graphics::draw(
-    //         ctx,
-    //         image,
-    //         DrawParam::default()
-    //             .dest([self.x, y])
-    //             .scale([0.8, 0.8]), // 僵尸图像缩放比例
-    //     )
-    // }
+        graphics::draw(
+            ctx,
+            image,
+            DrawParam::default()
+                .dest([self.x, y])
+                .scale([0.8, 0.8]), // 僵尸图像缩放比例
+        )
+    }
 
     // 添加 getter 方法以访问私有字段
     pub fn get_row(&self) -> usize {

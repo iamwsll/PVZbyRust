@@ -19,7 +19,7 @@ pub struct GameState {
     zombies: Vec<Zombie>,
     suns: Vec<Sun>,
     sun_count: i32,
-    // spawn_timer: Duration, // Replace with Instant for better time tracking
+    spawn_timer: Duration, // Replace with Instant for better time tracking
     last_zombie_spawn_time: Instant,
     zombie_spawn_interval: Duration, // Time between zombie spawns
     selected_plant: Option<PlantType>,
@@ -40,7 +40,7 @@ impl GameState {
             zombies: Vec::new(),
             suns: Vec::new(),
             sun_count: 50,
-            // spawn_timer: Duration::from_secs(0), // Remove old timer
+            spawn_timer: Duration::from_secs(0), // Remove old timer
             last_zombie_spawn_time: Instant::now(), // Initialize spawn time
             zombie_spawn_interval: Duration::from_secs(10), // Initial spawn interval (e.g., 10 seconds)
             selected_plant: None,
@@ -53,6 +53,7 @@ impl GameState {
     fn spawn_zombie(&mut self) {
         let mut rng = rand::thread_rng();
         let row = rng.gen_range(0..GRID_HEIGHT); // Random row from 0 to 4
+        // print!("Spawning zombie at row: {}", row);
         // TODO: Add logic to randomly select zombie type when more types are added
         let zombie_type = ZombieType::Normal;
         let zombie = Zombie::new(zombie_type, row);
@@ -114,10 +115,10 @@ impl EventHandler for GameState {
                 }
                 self.suns.append(&mut new_suns); // Add newly generated suns
 
-                // // 更新僵尸
-                // for zombie in &mut self.zombies {
-                //     zombie.update(dt);
-                // }
+                // 更新僵尸
+                for zombie in &mut self.zombies {
+                    zombie.update(dt);
+                }
 
                 // // 检查僵尸是否到达左侧边界 (游戏结束条件)
                 // for zombie in &self.zombies {
@@ -142,12 +143,12 @@ impl EventHandler for GameState {
                     self.spawn_sun();
                 }
 
-                // // 定时生成僵尸
-                // let now = Instant::now();
-                // if now.duration_since(self.last_zombie_spawn_time) >= self.zombie_spawn_interval {
-                //     self.spawn_zombie();
-                //     self.last_zombie_spawn_time = now; // Reset the timer
-                // }
+                // 定时生成僵尸
+                let now = Instant::now();
+                if now.duration_since(self.last_zombie_spawn_time) >= self.zombie_spawn_interval {
+                    self.spawn_zombie();
+                    self.last_zombie_spawn_time = now; // Reset the timer
+                }
 
 
                 // 更新商店
@@ -176,10 +177,10 @@ impl EventHandler for GameState {
             plant.draw(ctx, &self.resources)?;
         }
 
-        // // 绘制僵尸
-        // for zombie in &self.zombies {
-        //     zombie.draw(ctx, &self.resources)?;
-        // }
+        // 绘制僵尸
+        for zombie in &self.zombies {
+            zombie.draw(ctx, &self.resources)?;
+        }
 
         // 绘制阳光
         for sun in &self.suns {

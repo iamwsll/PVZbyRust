@@ -4,6 +4,8 @@ use std::collections::HashMap; // Keep HashMap if needed for other resources
 use std::path::Path;
 use std::vec;
 
+use crate::zombies;
+
 pub struct Resources {
     // Background and UI
     pub background: Image,
@@ -19,7 +21,7 @@ pub struct Resources {
     pub wallnut_card: Image,
 
     // Zombie Images (Add different states)
-    // pub zombie_walk_images: Vec<Image>, // For walking animation
+    pub zombiesWalk1_images: Vec<Image>, // For walking animation
     // pub zombie_attack_images: Vec<Image>, // Future: For attacking animation
     // pub zombie_die_images: Vec<Image>, // Future: For dying animation
     // Add images for other zombie types (Conehead, Buckethead) here...
@@ -104,10 +106,20 @@ impl Resources {
 
         // // Load zombie images
         // // TODO: Load proper animation sequences
-        // let zombie_walk_images = vec![
-        //     Image::new(ctx, "/zombies/ZombieWalk1.gif")?,
-        //     Image::new(ctx, "/zombies/ZombieWalk2.gif")?,
-        // ];
+        let mut zombiesWalk1_images = Vec::new();
+        for i in 1..=22 { // Loop from 1 to 10 (assuming only one image)
+            let path = format!("/zombies/ZombieWalk1/{}.png", i);
+            // Check if the file exists before trying to load it
+            // Note: Adjust the base path ("Resource") if your structure differs
+            if Path::new("Resource").join(path.trim_start_matches('/')).exists() {
+                 match Image::new(ctx, &path) {
+                     Ok(img) => zombiesWalk1_images.push(img),
+                     Err(e) => println!("Warning: Failed to load zombie walk image {}: {}", path, e),
+                 }
+            } else {
+                 println!("Warning: Zombie walk image not found: {}", path);
+            }
+        }
         // let zombie_attack_images = vec![Image::new(ctx, "/zombies/ZombieAttack.gif")?];
         // let zombie_die_images = vec![Image::new(ctx, "/zombies/ZombieDie.gif")?];
 
@@ -122,7 +134,7 @@ impl Resources {
             peashooter_card,
             sunflower_card,
             wallnut_card,
-            // zombie_walk_images, // Keep commented if not loaded yet
+            zombiesWalk1_images,
             // zombie_attack_images,
             // zombie_die_images,
             // Assign other potentially unloaded Vecs as empty or handle appropriately
