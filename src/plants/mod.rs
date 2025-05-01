@@ -67,6 +67,11 @@ impl Plant {
         }
     }
 
+    /// 用来更新植物状态
+    /// @param dt: 距离上次更新的时间
+    /// @param suns: 由于向日葵会产生阳光，所以需要传入阳光的引用
+    /// @return: None
+    /// @note: 添加植物时需要记得在这里修改有关信息。
     pub fn update(&mut self, dt: u64, suns: &mut Vec<Sun>) {
         // 动画更新 (通用逻辑)
         self.animation_timer += dt;

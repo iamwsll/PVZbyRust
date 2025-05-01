@@ -1,7 +1,7 @@
 use std::path::PathBuf;
-use ggez::{Context, ContextBuilder, GameResult};
+use ggez::{ContextBuilder, GameResult};
 use ggez::conf::{WindowMode, WindowSetup};
-use ggez::event::{self, EventHandler};
+use ggez::event::{self};
 
 mod game;
 mod resources;
@@ -10,6 +10,8 @@ mod zombies; // Add zombies module
 mod sun;
 mod grid;
 mod shop;
+mod level_controller; // 添加 level_controller 模块
+
 
 // 设计时的窗口尺寸，作为缩放参考基准
 pub const DESIGN_WIDTH: f32 = 1400.0;

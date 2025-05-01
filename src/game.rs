@@ -4,12 +4,11 @@ use crate::resources::Resources;
 use crate::sun::{Sun, SunType};
 use crate::zombies::{Zombie, ZombieType}; // Use the zombies module
 use crate::shop::Shop;
+use crate::level_controller::LevelController; // 游戏进度/难度控制器
 use ggez::event::EventHandler;
-use ggez::graphics::{self, Color, DrawParam, Image};
+use ggez::graphics::{self, Color, DrawParam};
 use ggez::input::mouse::MouseButton;
 use ggez::{Context, GameResult};
-use std::time::{Duration, Instant}; // Import Instant
-use rand::Rng; // Import Rng trait for random number generation
 
 // 游戏状态
 pub struct GameState {
@@ -19,12 +18,10 @@ pub struct GameState {
     zombies: Vec<Zombie>,
     suns: Vec<Sun>,
     sun_count: i32,
-    spawn_timer: Duration, // Replace with Instant for better time tracking
-    last_zombie_spawn_time: Instant,
-    zombie_spawn_interval: Duration, // Time between zombie spawns
-    selected_plant: Option<PlantType>,
+    selected_plant: Option<PlantType>,//选中的植物类型。用来放置植物有关的内容
     game_over: bool,
     shop: Shop,
+    level_controller: LevelController, // 添加关卡控制器
 }
 
 impl GameState {
@@ -32,6 +29,7 @@ impl GameState {
         let resources = Resources::new(ctx)?;
         let grid = Grid::new();
         let shop = Shop::new();
+        let level_controller = LevelController::new();
 
         Ok(GameState {
             resources,
@@ -40,37 +38,25 @@ impl GameState {
             zombies: Vec::new(),
             suns: Vec::new(),
             sun_count: 50,
-            spawn_timer: Duration::from_secs(0), // Remove old timer
-            last_zombie_spawn_time: Instant::now(), // Initialize spawn time
-            zombie_spawn_interval: Duration::from_secs(10), // Initial spawn interval (e.g., 10 seconds)
             selected_plant: None,
             game_over: false,
             shop,
+            level_controller, // 添加到 GameState
         })
     }
 
-    // Modified spawn_zombie to randomly select type (currently only Normal) and row
-    fn spawn_zombie(&mut self) {
-        let mut rng = rand::thread_rng();
-        let row = rng.gen_range(0..GRID_HEIGHT); // Random row from 0 to 4
-        // print!("Spawning zombie at row: {}", row);
-        // TODO: Add logic to randomly select zombie type when more types are added
-        let zombie_type = ZombieType::Normal;
+    //产生僵尸的抽象
+    fn spawn_zombie(&mut self, zombie_type: ZombieType, row: usize) {
         let zombie = Zombie::new(zombie_type, row);
         self.zombies.push(zombie);
-
-        // Optionally, decrease spawn interval over time to increase difficulty
-        // if self.zombie_spawn_interval > Duration::from_secs(3) {
-        //     self.zombie_spawn_interval -= Duration::from_millis(100);
-        // }
     }
-
+    // 产生阳光的抽象
     fn spawn_sun(&mut self) {
         let x = rand::random::<f32>() * 700.0 + 50.0;
         let sun = Sun::new(x, 0.0, SunType::NaturalGeneration);
         self.suns.push(sun);
     }
-
+    // 处理植物放置逻辑
     fn place_plant(&mut self, x: f32, y: f32) -> bool {
         if let Some(plant_type) = &self.selected_plant {
             if let Some((grid_x, grid_y)) = self.grid.get_grid_position(x, y) {
@@ -95,40 +81,33 @@ impl GameState {
 
 impl EventHandler for GameState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        // ... (dt calculation remains the same) ...
+        //游戏帧率，时间间隔
         const DESIRED_FPS: u32 = 60;
         let dt = ggez::timer::delta(ctx).as_millis() as u64;
 
-
         while ggez::timer::check_update_time(ctx, DESIRED_FPS) {
             if !self.game_over {
-                // 更新阳光
+                // 更新阳光数组的持续时间
                 for sun in &mut self.suns {
                     sun.update(dt);
                 }
 
                 // 更新植物
-                // Need to handle sun generation carefully - maybe collect new suns separately
                 let mut new_suns = Vec::new();
                 for plant in &mut self.plants {
-                    plant.update(dt, &mut new_suns); // Pass a temporary vec for new suns
+                    plant.update(dt, &mut new_suns);
                 }
-                self.suns.append(&mut new_suns); // Add newly generated suns
+                // 把阳光类植物添加进来
+                self.suns.append(&mut new_suns); 
 
                 // 更新僵尸
                 for zombie in &mut self.zombies {
                     zombie.update(dt);
                 }
 
-                // // 检查僵尸是否到达左侧边界 (游戏结束条件)
-                // for zombie in &self.zombies {
-                //     if zombie.get_x() < GRID_START_X - 50.0 { // Give some buffer
-                //         println!("Zombies reached your house! Game Over!");
-                //         self.game_over = true;
-                //         break; // Exit loop once game is over
-                //     }
-                // }
-                if self.game_over { continue; } // Skip rest of update if game over
+                // 检查游戏是否结束。放在更新僵尸之后。
+                // TODO：更加严谨的做法
+                if self.game_over { continue; } 
 
 
                 // // 移除死亡的植物和僵尸 (示例，需要更完善的碰撞和生命值处理)
@@ -139,16 +118,22 @@ impl EventHandler for GameState {
 
 
                 // 随机生成自然阳光
-                if rand::random::<u32>() % 500 == 0 { // Adjust frequency as needed
+                if rand::random::<u32>() % 500 == 0 { //TODO：太过粗糙，当前实际上需要修改
                     self.spawn_sun();
                 }
 
-                // 定时生成僵尸
-                let now = Instant::now();
-                if now.duration_since(self.last_zombie_spawn_time) >= self.zombie_spawn_interval {
-                    self.spawn_zombie();
-                    self.last_zombie_spawn_time = now; // Reset the timer
+                // 更新关卡控制器并生成僵尸
+                let zombie_spawns = self.level_controller.update(dt);
+                for spawn_info in zombie_spawns {
+                    self.spawn_zombie(spawn_info.zombie_type, spawn_info.row);
                 }
+
+                // // 定时生成僵尸 - 逻辑已移至 LevelController
+                // let now = Instant::now();
+                // if now.duration_since(self.last_zombie_spawn_time) >= self.zombie_spawn_interval {
+                //     self.spawn_zombie(); // Old call removed
+                //     self.last_zombie_spawn_time = now; // Reset the timer
+                // }
 
 
                 // 更新商店
@@ -235,7 +220,6 @@ impl EventHandler for GameState {
 
         if button == MouseButton::Left {
             // 检查是否点击了阳光
-            let initial_sun_count = self.sun_count;
             self.suns.retain(|sun| {
                 if sun.contains_point(x, y) {
                     self.sun_count += 25;
