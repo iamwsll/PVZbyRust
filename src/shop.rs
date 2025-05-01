@@ -1,6 +1,5 @@
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, DrawParam, Color, Rect};
-use ggez::input::mouse::MouseButton;
 use crate::plants::PlantType;
 use crate::resources::Resources;
 use std::time::{Duration, Instant};
@@ -14,21 +13,26 @@ pub const CARD_SPACING: f32 = 10.0;
 
 // 卡片冷却时间（毫秒）
 const COOLDOWN_TIMES: [u64; 3] = [
-    5000,  // Peashooter
-    5000,  // Sunflower
-    10000,  // WallNut
+    5000,  // 豌豆射手
+    5000,  // 向日葵
+    10000,  // 坚果墙
 ];
 
 pub struct PlantCard {
     pub plant_type: PlantType,
     pub position: (f32, f32),
     pub available: bool,
-    pub cooldown: Duration,
-    pub last_used: Option<Instant>,
+    pub cooldown: Duration,// 冷却时间
+    pub last_used: Option<Instant>,// 上次使用时间
     pub rect: Rect,
 }
 
 impl PlantCard {
+    /// 创建植物卡片
+    /// @param plant_type 植物类型
+    /// @param index 卡片在商店中的索引
+    /// @return PlantCard 实例
+    /// @note 这里的 index 用于计算卡片在商店中的位置
     pub fn new(plant_type: PlantType, index: usize) -> Self {
         let x = SHOP_START_X + (CARD_WIDTH + CARD_SPACING) * index as f32;
         let y = SHOP_START_Y;
@@ -43,16 +47,19 @@ impl PlantCard {
         }
     }
 
+    /// 更新植物卡片的状态
+    /// @param sun_count 当前阳光数量
+    /// @note 如果植物卡片在冷却中，则不可用
     pub fn update(&mut self, sun_count: i32) {
         // 检查冷却时间 这里额外处理了第一次使用时的情况
-        if let Some(last_used) = self.last_used {
-            if last_used.elapsed() < self.cooldown {
+        if let Some(last_used) = self.last_used {// 如果有上次使用时间
+            if last_used.elapsed() < self.cooldown {// 还在冷却中
                 self.available = false;
-            } else {
+            } else {// 冷却结束
                 self.available = sun_count >= self.plant_type.cost();
             }
         } else {
-            self.available = sun_count >= self.plant_type.cost();
+            self.available = sun_count >= self.plant_type.cost();// 第一次使用时，直接可用
         }
     }
 
@@ -172,6 +179,12 @@ impl Shop {
         Ok(())
     }
     
+    /// 处理点击事件
+    /// @param x 鼠标点击的x坐标
+    /// @param y 鼠标点击的y坐标
+    /// @param sun_count 当前阳光数量
+    /// @return: Option<PlantType> 返回选中的植物类型
+    /// @note: 如果点击了植物卡片且阳光足够，则返回选中的植物类型，否则返回 None
     pub fn handle_click(&mut self, x: f32, y: f32, sun_count: i32) -> Option<PlantType> {
         // 如果有选中的植物，就取消选择
         if self.selected_plant.is_some() {

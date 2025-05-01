@@ -1,5 +1,5 @@
 use ggez::{Context, GameResult};
-use ggez::graphics::{self, Mesh, DrawMode, Color, DrawParam};
+use ggez::graphics::{self, Mesh, Color, DrawParam};
 
 // 定义网格位置常量
 // -------->x 

@@ -2,12 +2,15 @@ use crate::grid::{GRID_CELL_HEIGHT, GRID_CELL_WIDTH, GRID_START_X, GRID_START_Y}
 use crate::sun::{Sun, SunType};
 
 pub const INITIAL_HEALTH: i32 = 300;
-pub const COOLDOWN: u64 = 10000; // Example cooldown for producing sun
+pub const COOLDOWN: u64 = 10000; // 太阳产生间隔。TODO：根据实际情况调整
 
-// 向日葵的特定更新逻辑
-// 接受一个可变的 suns 向量引用
+/// 向日葵的特定更新逻辑
+///@param grid_x: 网格的X坐标
+/// @param grid_y: 网格的Y坐标
+/// @param suns: 可变的阳光向量引用
+/// @return: None
 pub fn update(grid_x: usize, grid_y: usize, suns: &mut Vec<Sun>) {
-    // 增加随机性：例如， 按概率产生阳光
+    // 增加随机性：例如， 按概率产生阳光。TODO：后期修改逻辑
     // if rand::random::<f32>() < 0.05 {
         update_sun(grid_x, grid_y, suns); // 产生阳光
     // }

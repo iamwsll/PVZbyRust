@@ -1,18 +1,14 @@
-use ggez::graphics::{Image, Font};
+use ggez::graphics::Image;
 use ggez::{Context, GameResult};
-use std::collections::HashMap; // Keep HashMap if needed for other resources
 use std::path::Path;
-use std::vec;
-
-use crate::zombies;
 
 pub struct Resources {
-    // Background and UI
+    // 背景和ui
     pub background: Image,
     pub shop_image: Image,
     pub sun_images: Vec<Image>, // Keep sun animation frames
 
-    // Plant Images (Individual and Card)
+    // 植物图像，包括动画帧和商店中的card
     pub peashooter_images: Vec<Image>,
     pub sunflower_images: Vec<Image>,
     pub wallnut_images: Vec<Image>,
@@ -20,8 +16,8 @@ pub struct Resources {
     pub sunflower_card: Image,
     pub wallnut_card: Image,
 
-    // Zombie Images (Add different states)
-    pub zombiesWalk1_images: Vec<Image>, // For walking animation
+    // 僵尸图像
+    pub zombies_walk1_images: Vec<Image>, //僵尸行走动作1
     // pub zombie_attack_images: Vec<Image>, // Future: For attacking animation
     // pub zombie_die_images: Vec<Image>, // Future: For dying animation
     // Add images for other zombie types (Conehead, Buckethead) here...
@@ -34,69 +30,49 @@ pub struct Resources {
     // pub font: Font,
 }
 
+// 加载动画帧的帮助函数
+fn load_animation_frames(
+    ctx: &mut Context,
+    path_pattern: &str,
+    frame_count: std::ops::RangeInclusive<usize>,
+    asset_name: &str,
+) -> GameResult<Vec<Image>> {
+    let mut frames = Vec::new();
+    for i in frame_count {
+        let path = path_pattern.replace("{}", &i.to_string());
+        let full_path = Path::new("Resource").join(path.trim_start_matches('/'));
+        if full_path.exists() {
+            match Image::new(ctx, &path) {
+                Ok(img) => frames.push(img),
+                Err(e) => println!(
+                    "Warning: Failed to load {} image {}: {}",
+                    asset_name, path, e
+                ),
+            }
+        } else {
+            println!("Warning: {} image not found: {}", asset_name, path);
+        }
+    }
+    Ok(frames)
+}
+
+
 impl Resources {
     pub fn new(ctx: &mut Context) -> GameResult<Resources> {
         // Load background and UI
         let background = Image::new(ctx, "/other_image/Background.png")?;
         let shop_image = Image::new(ctx, "/other_image/Shop.png")?;
 
-        // Load sun animation frames
-        let mut sun_images = Vec::new();
-        for i in 0..=21 {
-            let path = format!("/other_image/sun/Sun{}.png", i);
-            if Path::new("Resource").join(path.trim_start_matches('/')).exists() {
-                 sun_images.push(Image::new(ctx, &path)?);
-            } else {
-                 println!("Warning: Sun image not found: {}", path);
-            }
-        }
+        // 加载太阳动画帧
+        let sun_images = load_animation_frames(ctx, "/other_image/sun/Sun{}.png", 0..=21, "Sun")?;
 
-        // Load plant images
-        let mut peashooter_images = Vec::new(); // Placeholder for Peashooter images
-        for i in 1..=13 { // Loop from 1 to 13
-            let path = format!("/plants/Peashooter/{}.png", i);
-            // Check if the file exists before trying to load it
-            // Note: Adjust the base path ("Resource") if your structure differs
-            if Path::new("Resource").join(path.trim_start_matches('/')).exists() {
-                 match Image::new(ctx, &path) {
-                     Ok(img) => peashooter_images.push(img),
-                     Err(e) => println!("Warning: Failed to load peashooter image {}: {}", path, e),
-                 }
-            } else {
-                 println!("Warning: Peashooter image not found: {}", path);
-            }
-        }
+        //加载植物图像
+        let peashooter_images = load_animation_frames(ctx, "/plants/Peashooter/{}.png", 1..=13, "Peashooter")?;
 
-        let mut sunflower_images = Vec::new();
-        for i in 1..=18 { // Loop from 1 to 18
-            let path = format!("/plants/SunFlower/{}.png", i);
-            // Check if the file exists before trying to load it
-            // Note: Adjust the base path ("Resource") if your structure differs
-            if Path::new("Resource").join(path.trim_start_matches('/')).exists() {
-                 match Image::new(ctx, &path) {
-                     Ok(img) => sunflower_images.push(img),
-                     Err(e) => println!("Warning: Failed to load sunflower image {}: {}", path, e),
-                 }
-            } else {
-                 println!("Warning: Sunflower image not found: {}", path);
-            }
-        }
+        let sunflower_images = load_animation_frames(ctx, "/plants/SunFlower/{}.png", 1..=18, "Sunflower")?;
 
+        let wallnut_images = load_animation_frames(ctx, "/plants/WallNut/WallnutFull/{}.png", 1..=16, "Wallnut")?;
 
-        let mut wallnut_images = Vec::new();
-        for i in 1..=16 { // Loop from 1 to 16 (assuming only one image)
-            let path = format!("/plants/WallNut/WallnutFull/{}.png", i);
-            // Check if the file exists before trying to load it
-            // Note: Adjust the base path ("Resource") if your structure differs
-            if Path::new("Resource").join(path.trim_start_matches('/')).exists() {
-                 match Image::new(ctx, &path) {
-                     Ok(img) => wallnut_images.push(img),
-                     Err(e) => println!("Warning: Failed to load wallnut image {}: {}", path, e),
-                 }
-            } else {
-                 println!("Warning: Wallnut image not found: {}", path);
-            }
-        }
 
         // Load plant cards
         let peashooter_card = Image::new(ctx, "/plants/Peashooter.png")?;
@@ -104,22 +80,8 @@ impl Resources {
         let wallnut_card = Image::new(ctx, "/plants/WallNut.png")?;
 
 
-        // // Load zombie images
-        // // TODO: Load proper animation sequences
-        let mut zombiesWalk1_images = Vec::new();
-        for i in 1..=22 { // Loop from 1 to 10 (assuming only one image)
-            let path = format!("/zombies/ZombieWalk1/{}.png", i);
-            // Check if the file exists before trying to load it
-            // Note: Adjust the base path ("Resource") if your structure differs
-            if Path::new("Resource").join(path.trim_start_matches('/')).exists() {
-                 match Image::new(ctx, &path) {
-                     Ok(img) => zombiesWalk1_images.push(img),
-                     Err(e) => println!("Warning: Failed to load zombie walk image {}: {}", path, e),
-                 }
-            } else {
-                 println!("Warning: Zombie walk image not found: {}", path);
-            }
-        }
+        // 加载僵尸图像
+        let zombies_walk1_images = load_animation_frames(ctx, "/zombies/ZombieWalk1/{}.png", 1..=22, "Zombie walk")?;
         // let zombie_attack_images = vec![Image::new(ctx, "/zombies/ZombieAttack.gif")?];
         // let zombie_die_images = vec![Image::new(ctx, "/zombies/ZombieDie.gif")?];
 
@@ -134,7 +96,7 @@ impl Resources {
             peashooter_card,
             sunflower_card,
             wallnut_card,
-            zombiesWalk1_images,
+            zombies_walk1_images,
             // zombie_attack_images,
             // zombie_die_images,
             // Assign other potentially unloaded Vecs as empty or handle appropriately

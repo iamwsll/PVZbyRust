@@ -54,7 +54,7 @@ impl Sun {
 
         self.lifetime += dt;
         
-        // 动画帧更新逻辑保持不变
+        // 动画帧更新逻辑保
         self.animation_timer += dt;
         if self.animation_timer > 50 {  // 缩短切换时间使动画更流畅
             self.animation_frame = (self.animation_frame + 1) % 22;  // 在22帧之间循环

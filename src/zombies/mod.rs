@@ -48,7 +48,7 @@ impl Zombie {
     pub fn update(&mut self, dt: u64) {
         // 动画更新 (通用逻辑)
         self.animation_timer += dt;
-        if self.animation_timer > 200 { // 动画切换速度
+        if self.animation_timer > 200 { // 动画切换速度，每200ms绘制动画的一帧。
             // TODO: 根据僵尸类型和状态（行走/攻击）选择不同的动画帧范围
             let frame_count = 22; // 22帧
             self.animation_frame = (self.animation_frame + 1) % frame_count;
@@ -79,12 +79,12 @@ impl Zombie {
             ZombieType::Normal => {
                 // TODO: 根据 attacking 状态选择行走或攻击动画
                 // 目前只使用行走动画
-                let frame_count = resources.zombiesWalk1_images.len();
+                let frame_count = resources.zombies_walk1_images.len();
                 if frame_count > 0 {
-                    &resources.zombiesWalk1_images[self.animation_frame % frame_count]
+                    &resources.zombies_walk1_images[self.animation_frame % frame_count]
                 } else {
                     println!("No images available for Normal Zombie");
-                    &resources.zombiesWalk1_images[0] // 返回默认图像或处理错误
+                    &resources.zombies_walk1_images[0] // 返回默认图像或处理错误
                 }
             }
             // Handle other zombie types...
@@ -99,14 +99,6 @@ impl Zombie {
         )
     }
 
-    // 添加 getter 方法以访问私有字段
-    pub fn get_row(&self) -> usize {
-        self.row
-    }
-
-    pub fn get_x(&self) -> f32 {
-        self.x
-    }
 
     // pub fn get_rect(&self, resources: &Resources) -> graphics::Rect {
     //     // 获取当前僵尸图像的尺寸用于碰撞检测
@@ -130,12 +122,4 @@ impl Zombie {
     //     graphics::Rect::new(self.x + width * 0.1, y, width * 0.8, height)
     // }
 
-
-    pub fn take_damage(&mut self, amount: i32) {
-        self.health -= amount;
-    }
-
-    pub fn is_alive(&self) -> bool {
-        self.health > 0
-    }
 }

@@ -23,7 +23,10 @@ impl LevelController {
         }
     }
 
-    // 更新控制器状态，返回需要生成的僵尸信息列表
+    /// 更新控制器状态，返回需要生成的僵尸信息列表
+    /// @param dt 时间增量（毫秒）
+    /// @return Vec<ZombieSpawnInfo> 需要生成的僵尸信息列表
+    /// @note 这里的 dt 可以用于动态调整生成间隔或其他逻辑
     pub fn update(&mut self, _dt: u64) -> Vec<ZombieSpawnInfo> {
         let mut spawns = Vec::new();
         let now = Instant::now();

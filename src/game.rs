@@ -56,7 +56,11 @@ impl GameState {
         let sun = Sun::new(x, 0.0, SunType::NaturalGeneration);
         self.suns.push(sun);
     }
-    // 处理植物放置逻辑
+    /// 处理植物放置逻辑
+    /// @param x 鼠标点击的x坐标
+    /// @param y 鼠标点击的y坐标
+    /// @return: bool 是否成功放置植物
+    /// @note: 需要检查植物类型、阳光数量、网格位置等
     fn place_plant(&mut self, x: f32, y: f32) -> bool {
         if let Some(plant_type) = &self.selected_plant {
             if let Some((grid_x, grid_y)) = self.grid.get_grid_position(x, y) {
@@ -97,7 +101,7 @@ impl EventHandler for GameState {
                 for plant in &mut self.plants {
                     plant.update(dt, &mut new_suns);
                 }
-                // 把阳光类植物添加进来
+                // 把阳光类植物产生的阳光添加进来
                 self.suns.append(&mut new_suns); 
 
                 // 更新僵尸
@@ -128,14 +132,6 @@ impl EventHandler for GameState {
                     self.spawn_zombie(spawn_info.zombie_type, spawn_info.row);
                 }
 
-                // // 定时生成僵尸 - 逻辑已移至 LevelController
-                // let now = Instant::now();
-                // if now.duration_since(self.last_zombie_spawn_time) >= self.zombie_spawn_interval {
-                //     self.spawn_zombie(); // Old call removed
-                //     self.last_zombie_spawn_time = now; // Reset the timer
-                // }
-
-
                 // 更新商店
                 self.shop.update(self.sun_count);
             }
@@ -151,7 +147,7 @@ impl EventHandler for GameState {
         graphics::draw(ctx, bg, DrawParam::default())?;
 
         // 绘制商店面板
-        let shop_img = &self.resources.shop_image; // Use the correct variable name
+        let shop_img = &self.resources.shop_image;
         graphics::draw(ctx, shop_img, DrawParam::default().dest([250.0, 0.0]))?;
 
         //绘制网格（调试用）
@@ -213,6 +209,11 @@ impl EventHandler for GameState {
         Ok(())
     }
 
+    /// 处理鼠标点击事件
+    /// @param ctx
+    /// @param button 鼠标按键
+    /// @param x 鼠标点击的x坐标
+    /// @param y 鼠标点击的y坐标
     fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
         if self.game_over {
             return;
@@ -220,6 +221,7 @@ impl EventHandler for GameState {
 
         if button == MouseButton::Left {
             // 检查是否点击了阳光
+            let initial_sun_count = self.sun_count;
             self.suns.retain(|sun| {
                 if sun.contains_point(x, y) {
                     self.sun_count += 25;
@@ -228,7 +230,7 @@ impl EventHandler for GameState {
                     true // Keep the sun
                 }
             });
-            // if self.sun_count > initial_sun_count { return; } // If sun was clicked, don't process other clicks
+            if self.sun_count > initial_sun_count { return; } // If sun was clicked, don't process other clicks
 
             // 处理商店卡片点击 (优先于放置植物)
             // Check if click is within shop bounds first
