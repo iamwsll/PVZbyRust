@@ -18,7 +18,7 @@ pub struct Resources {
 
     // 僵尸图像
     pub zombies_walk1_images: Vec<Image>, //僵尸行走动作1
-    // pub zombie_attack_images: Vec<Image>, // Future: For attacking animation
+    pub zombie_attack_images: Vec<Image>, // 僵尸攻击动画
     pub zombie_die_images: Vec<Image>, // 僵尸死亡动作
     pub zombie_head_images: Vec<Image>, // 僵尸头掉落动作
     // Add images for other zombie types (Conehead, Buckethead) here...
@@ -83,7 +83,7 @@ impl Resources {
 
         // 加载僵尸图像
         let zombies_walk1_images = load_animation_frames(ctx, "/zombies/ZombieWalk1/{}.png", 1..=22, "Zombie walk")?;
-        // let zombie_attack_images = vec![Image::new(ctx, "/zombies/ZombieAttack.gif")?];
+        let zombie_attack_images = load_animation_frames(ctx, "/zombies/ZombieAttack/{}.png", 1..=21, "Zombie attack")?;
         let zombie_die_images = load_animation_frames(ctx, "/zombies/ZombieDie/{}.png", 1..=10, "Zombie die")?;
         let zombie_head_images = load_animation_frames(ctx, "/zombies/ZombieHead/{}.png", 1..=12, "Zombie head fall")?;
 
@@ -103,7 +103,7 @@ impl Resources {
             sunflower_card,
             wallnut_card,
             zombies_walk1_images,
-            // zombie_attack_images,
+            zombie_attack_images,
             zombie_die_images,
             zombie_head_images,
             pea_image,

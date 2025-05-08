@@ -137,6 +137,51 @@ impl GameState {
         // 移除死亡动画已完成的僵尸
         self.zombies.retain(|zombie| !zombie.death_animation_complete);
     }
+    /// 处理僵尸和植物的交互
+    /// @note: 当僵尸遇到植物时，会停止前进并开始攻击植物
+    fn handle_zombie_plant_interaction(&mut self, ctx: &mut Context) {
+        // 遍历所有僵尸
+        for zombie in &mut self.zombies {
+            // 如果僵尸已经死亡，跳过
+            if zombie.is_dying {
+                continue;
+            }
+            
+            let mut is_attacking = false;
+            let mut target_index = None;
+            
+            // 检查是否有植物在僵尸前方
+            for (i, plant) in self.plants.iter_mut().enumerate() {
+                // 如果植物已经死亡，跳过
+                if plant.is_dead {
+                    continue;
+                }
+                
+                // 检查僵尸是否可以攻击这个植物
+                if zombie.has_plant_in_front(plant.grid_x, plant.grid_y) {
+                    // 设置僵尸为攻击状态
+                    is_attacking = true;
+                    target_index = Some(i);
+                    
+                    // 僵尸攻击植物
+                    zombie.attack_plant(&mut plant.health, ggez::timer::delta(ctx).as_millis() as u64);
+                    
+                    // 检查植物是否死亡
+                    if plant.health <= 0 {
+                        plant.is_dead = true;
+                    }
+                    
+                    break; // 一个僵尸同时只能攻击一个植物
+                }
+            }
+            
+            // 更新僵尸的攻击状态
+            zombie.set_attacking(is_attacking, target_index);
+        }
+        
+        // 移除死亡的植物
+        self.plants.retain(|plant| !plant.is_dead);
+    }
 }
 
 impl EventHandler for GameState {
@@ -171,6 +216,7 @@ impl EventHandler for GameState {
                 }
 
                 self.handle_pea_zombie_collision();
+                self.handle_zombie_plant_interaction(ctx); // 处理僵尸和植物的交互
 
                 // 检查游戏是否结束。放在更新僵尸之后。
                 for zombie in &self.zombies {

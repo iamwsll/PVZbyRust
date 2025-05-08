@@ -27,17 +27,19 @@ impl PlantType {
     }
 }
 
+// 修改Plant结构体，使health字段公开
 pub struct Plant {
     plant_type: PlantType,
-    grid_x: usize,
-    grid_y: usize,
-    health: i32,
+    pub grid_x: usize,
+    pub grid_y: usize,
+    pub health: i32,
     // 动画帧 目前没用?
     animation_frame: usize,
     animation_timer: u64,
     //这个冷却时间是指如豌豆射手的发射时间间隔
     cooldown: u64,
     cooldown_timer: u64,
+    pub is_dead: bool, // 植物是否死亡
 }
 
 impl Plant {
@@ -65,6 +67,7 @@ impl Plant {
             animation_timer: 0,
             cooldown, // Use specific cooldown
             cooldown_timer: 0,
+            is_dead: false,
         }
     }
 
@@ -75,6 +78,10 @@ impl Plant {
     /// @return: None
     /// @note: 添加植物时需要记得在这里修改有关信息。
     pub fn update(&mut self, dt: u64, suns: &mut Vec<Sun>, peas: &mut Vec<Pea>) {
+        if self.is_dead {
+            return; // 如果植物已经死亡，跳过更新
+        }
+
         // 动画更新 (通用逻辑)
         self.animation_timer += dt;
         if self.animation_timer > 100 { // 每100ms更新一次帧动画
@@ -155,5 +162,18 @@ impl Plant {
                 .dest([x, y])
                 .scale([0.8, 0.8]), // 考虑是否需要根据植物类型调整缩放?
         )
+    }
+
+    // 植物受伤方法
+    pub fn take_damage(&mut self, damage: i32) -> bool {
+        self.health -= damage;
+        
+        // 检查植物是否死亡
+        if self.health <= 0 {
+            self.is_dead = true;
+            return true;  // 返回true表示植物已死亡
+        }
+        
+        false  // 返回false表示植物仍然存活
     }
 }
