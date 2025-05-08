@@ -11,6 +11,7 @@ mod sun;
 mod grid;
 mod shop;
 mod level_controller; // level_controller 模块,用来控制游戏僵尸进度
+mod pea; // 豌豆射手的子弹
 
 
 // 设计时的窗口尺寸，作为缩放参考基准

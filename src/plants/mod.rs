@@ -3,6 +3,7 @@ use ggez::graphics::{self, DrawParam};
 use crate::resources::Resources;
 use crate::grid::{GRID_START_X, GRID_START_Y, GRID_CELL_HEIGHT,GRID_CELL_WIDTH};
 use crate::sun::Sun;
+use crate::pea::Pea;
 
 // Declare submodules and import their update functions
 pub mod peashooter;
@@ -70,9 +71,10 @@ impl Plant {
     /// 用来更新植物状态
     /// @param dt: 距离上次更新的时间
     /// @param suns: 由于向日葵会产生阳光，所以需要传入阳光的引用
+    /// @param peas: 由于豌豆射手会发射豌豆，所以需要传入豌豆的引用
     /// @return: None
     /// @note: 添加植物时需要记得在这里修改有关信息。
-    pub fn update(&mut self, dt: u64, suns: &mut Vec<Sun>) {
+    pub fn update(&mut self, dt: u64, suns: &mut Vec<Sun>, peas: &mut Vec<Pea>) {
         // 动画更新 (通用逻辑)
         self.animation_timer += dt;
         if self.animation_timer > 100 { // 每100ms更新一次帧动画
@@ -101,7 +103,10 @@ impl Plant {
                         // 向日葵需要传入suns
                         sunflower::update(self.grid_x, self.grid_y, suns);
                     },
-                    PlantType::Peashooter => peashooter::update(self.grid_x, self.grid_y),
+                    PlantType::Peashooter => {
+                        // 豌豆射手需要传入peas
+                        peashooter::update(self.grid_x, self.grid_y, peas);
+                    },
                     PlantType::WallNut => wallnut::update(self.grid_x, self.grid_y),
                 };
             }

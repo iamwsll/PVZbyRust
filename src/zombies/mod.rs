@@ -1,5 +1,5 @@
 use ggez::{Context, GameResult};
-use ggez::graphics::{self, DrawParam};
+use ggez::graphics::{self, DrawParam, Rect};
 use crate::resources::Resources;
 
 // 声明子模块
@@ -16,7 +16,7 @@ pub enum ZombieType {
 
 pub struct Zombie {
     zombie_type: ZombieType,
-    row: usize,
+    pub row: usize,
     pub x: f32, // Make x public for game logic access
     health: i32,
     speed: f32,
@@ -99,27 +99,24 @@ impl Zombie {
         )
     }
 
-
-    // pub fn get_rect(&self, resources: &Resources) -> graphics::Rect {
-    //     // 获取当前僵尸图像的尺寸用于碰撞检测
-    //     let image = match self.zombie_type {
-    //          ZombieType::Normal => {
-    //             let images = &resources.zombie_walk_images;
-    //             if !images.is_empty() {
-    //                 &images[self.animation_frame % images.len()]
-    //             } else {
-    //                  // 返回一个默认矩形或处理错误
-    //                  return graphics::Rect::new(self.x, 0.0, 0.0, 0.0);
-    //             }
-    //         }
-    //         // ... 其他僵尸类型
-    //     };
-    //     let y = crate::grid::GRID_START_Y + (self.row as f32) * crate::grid::GRID_CELL_HEIGHT + 15.0;
-    //     let scale = [0.8, 0.8]; // 与 draw 中使用的缩放一致
-    //     let width = image.width() as f32 * scale[0];
-    //     let height = image.height() as f32 * scale[1];
-    //     // 创建一个稍微调整过的矩形用于碰撞检测，可以根据需要微调
-    //     graphics::Rect::new(self.x + width * 0.1, y, width * 0.8, height)
-    // }
-
+    // 获取僵尸的碰撞矩形
+    pub fn get_rect(&self) -> Rect {
+        let y = crate::grid::GRID_START_Y + (self.row as f32) * crate::grid::GRID_CELL_HEIGHT - crate::grid::GRID_CELL_HEIGHT/4.0;
+        
+        // 僵尸的碰撞区域应该比显示的图像小一些，以使游戏更加公平 .TODO: 根据实际图像大小调整
+        let width = 60.0;
+        let height = 100.0;
+        
+        Rect::new(self.x + 40.0, y + 20.0, width, height)
+    }
+    
+    // 僵尸受到伤害的方法
+    pub fn take_damage(&mut self, damage: i32) -> bool {
+        self.health -= damage;
+        println!("僵尸受到{}点伤害，剩余生命值: {}", damage, self.health);
+        
+        // 返回僵尸是否死亡
+        self.health <= 0
+    }
+    
 }

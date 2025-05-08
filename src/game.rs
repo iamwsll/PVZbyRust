@@ -3,6 +3,7 @@ use crate::plants::{Plant, PlantType};
 use crate::resources::Resources;
 use crate::sun::{Sun, SunType};
 use crate::zombies::{Zombie, ZombieType}; // Use the zombies module
+use crate::pea::Pea; // 引入豌豆模块
 use crate::shop::Shop;
 use crate::level_controller::LevelController; // 游戏进度/难度控制器
 use ggez::event::EventHandler;
@@ -17,6 +18,7 @@ pub struct GameState {
     plants: Vec<Plant>,
     zombies: Vec<Zombie>,
     suns: Vec<Sun>,
+    peas: Vec<Pea>, // 添加豌豆列表
     sun_count: i32,
     selected_plant: Option<PlantType>,//选中的植物类型。用来放置植物有关的内容
     game_over: bool,
@@ -37,6 +39,7 @@ impl GameState {
             plants: Vec::new(),
             zombies: Vec::new(),
             suns: Vec::new(),
+            peas: Vec::new(), // 初始化豌豆列表
             sun_count: 50,
             selected_plant: None,
             game_over: false,
@@ -81,6 +84,59 @@ impl GameState {
         }
         false
     }
+    /// 处理豌豆和僵尸的碰撞
+    /// @note: 处理豌豆和僵尸的碰撞检测和处理
+    fn handle_pea_zombie_collision(&mut self) {
+        // 处理豌豆和僵尸的碰撞
+        let mut dead_zombies = Vec::new();
+        let mut inactive_peas = Vec::new();
+    
+        // 检测豌豆和僵尸的碰撞
+        for (pea_idx, pea) in self.peas.iter_mut().enumerate() {
+            if !pea.active {
+                inactive_peas.push(pea_idx);
+                continue;
+            }
+    
+            for (zombie_idx, zombie) in self.zombies.iter_mut().enumerate() {
+                // 如果不在同一行，跳过检测
+                if pea.row != zombie.row {
+                    continue;
+                }
+        
+                // 如果豌豆位置超过僵尸位置，可能发生碰撞
+                if pea.x + 20.0 >= zombie.x {
+                    // 检查碰撞
+                    let zombie_rect = zombie.get_rect();
+                    let pea_rect = pea.get_rect();
+            
+                    if pea_rect.overlaps(&zombie_rect) {
+                        // 碰撞发生，僵尸受伤
+                        let is_dead = zombie.take_damage(pea.damage);
+                        if is_dead {
+                            dead_zombies.push(zombie_idx);
+                        }
+                
+                        // 豌豆击中后消失
+                        pea.active = false;
+                        inactive_peas.push(pea_idx);
+                        break; // 一个豌豆只能击中一个僵尸
+                    }
+                }
+            }
+        }
+                
+        // 从高到低索引移除，避免索引失效
+        dead_zombies.sort_by(|a, b| b.cmp(a));
+        for idx in dead_zombies {
+            self.zombies.remove(idx);
+        }
+                
+        inactive_peas.sort_by(|a, b| b.cmp(a));
+        for idx in inactive_peas {
+            self.peas.remove(idx);
+        }
+    }
 }
 
 impl EventHandler for GameState {
@@ -99,7 +155,7 @@ impl EventHandler for GameState {
                 // 更新植物
                 let mut new_suns = Vec::new();
                 for plant in &mut self.plants {
-                    plant.update(dt, &mut new_suns);
+                    plant.update(dt, &mut new_suns, &mut self.peas);
                 }
                 // 把阳光类植物产生的阳光添加进来
                 self.suns.append(&mut new_suns); 
@@ -109,17 +165,22 @@ impl EventHandler for GameState {
                     zombie.update(dt);
                 }
 
+                // 更新豌豆位置
+                for pea in &mut self.peas {
+                    pea.update(dt);
+                }
+
+                self.handle_pea_zombie_collision();
+
                 // 检查游戏是否结束。放在更新僵尸之后。
-                // TODO：更加严谨的做法
-                if self.game_over { continue; } 
+                for zombie in &self.zombies {
+                    if zombie.x <= 0.0 {
+                        self.game_over = true;
+                        break;
+                    }
+                }
 
-
-                // // 移除死亡的植物和僵尸 (示例，需要更完善的碰撞和生命值处理)
-                // self.plants.retain(|plant| plant.is_alive());
-                // self.zombies.retain(|zombie| zombie.is_alive());
-
-                // TODO: 添加碰撞检测和处理逻辑 (植物 vs 僵尸, 子弹 vs 僵尸)
-
+                if self.game_over { continue; }
 
                 // 随机生成自然阳光
                 if rand::random::<u32>() % 500 == 0 { //TODO：太过粗糙，当前实际上需要修改
@@ -156,6 +217,11 @@ impl EventHandler for GameState {
         // 绘制植物
         for plant in &self.plants {
             plant.draw(ctx, &self.resources)?;
+        }
+        
+        // 绘制豌豆
+        for pea in &self.peas {
+            pea.draw(ctx, &self.resources)?;
         }
 
         // 绘制僵尸

@@ -22,9 +22,9 @@ pub struct Resources {
     // pub zombie_die_images: Vec<Image>, // Future: For dying animation
     // Add images for other zombie types (Conehead, Buckethead) here...
 
-    // Projectile Images
-    // pub pea_image: Image, // Future: For peashooter projectile
-    // pub snow_pea_image: Image, // Future: For snow pea projectile
+    // 豌豆射手的豌豆图像
+    pub pea_image: Image,     // 普通豌豆
+    // pub pea_snow_image: Image, // 寒冰豌豆
 
     // Font (Optional, if needed for custom text rendering)
     // pub font: Font,
@@ -86,6 +86,11 @@ impl Resources {
         // let zombie_die_images = vec![Image::new(ctx, "/zombies/ZombieDie.gif")?];
 
 
+        // 加载豌豆图像
+        let pea_image = Image::new(ctx, "/plants/Pea.png")?;
+        // let pea_snow_image = Image::new(ctx, "/plants/PeaSnow.png")?;
+
+
         Ok(Resources {
             background,
             shop_image,
@@ -99,6 +104,8 @@ impl Resources {
             zombies_walk1_images,
             // zombie_attack_images,
             // zombie_die_images,
+            pea_image,
+            // pea_snow_image,
             // Assign other potentially unloaded Vecs as empty or handle appropriately
         })
     }
