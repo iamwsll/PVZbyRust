@@ -88,7 +88,7 @@ impl GameState {
     /// @note: 处理豌豆和僵尸的碰撞检测和处理
     fn handle_pea_zombie_collision(&mut self) {
         // 处理豌豆和僵尸的碰撞
-        let mut dead_zombies = Vec::new();
+        // let mut dead_zombies = Vec::new(); // 不再立即记录死亡的僵尸
         let mut inactive_peas = Vec::new();
     
         // 检测豌豆和僵尸的碰撞
@@ -98,7 +98,12 @@ impl GameState {
                 continue;
             }
     
-            for (zombie_idx, zombie) in self.zombies.iter_mut().enumerate() {
+            for zombie in self.zombies.iter_mut() {
+                // 如果僵尸已经在死亡动画中，跳过碰撞检测
+                if zombie.is_dying {
+                    continue;
+                }
+                
                 // 如果不在同一行，跳过检测
                 if pea.row != zombie.row {
                     continue;
@@ -112,10 +117,7 @@ impl GameState {
             
                     if pea_rect.overlaps(&zombie_rect) {
                         // 碰撞发生，僵尸受伤
-                        let is_dead = zombie.take_damage(pea.damage);
-                        if is_dead {
-                            dead_zombies.push(zombie_idx);
-                        }
+                        zombie.take_damage(pea.damage); // 不再需要检查返回值，因为已经在函数内部设置了死亡状态
                 
                         // 豌豆击中后消失
                         pea.active = false;
@@ -125,17 +127,15 @@ impl GameState {
                 }
             }
         }
-                
-        // 从高到低索引移除，避免索引失效
-        dead_zombies.sort_by(|a, b| b.cmp(a));
-        for idx in dead_zombies {
-            self.zombies.remove(idx);
-        }
-                
+        
+        // 移除已经无效的豌豆
         inactive_peas.sort_by(|a, b| b.cmp(a));
         for idx in inactive_peas {
             self.peas.remove(idx);
         }
+        
+        // 移除死亡动画已完成的僵尸
+        self.zombies.retain(|zombie| !zombie.death_animation_complete);
     }
 }
 
