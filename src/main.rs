@@ -10,7 +10,7 @@ mod zombies; // Add zombies module
 mod sun;
 mod grid;
 mod shop;
-mod level_controller; // 添加 level_controller 模块
+mod level_controller; // level_controller 模块,用来控制游戏僵尸进度
 
 
 // 设计时的窗口尺寸，作为缩放参考基准
