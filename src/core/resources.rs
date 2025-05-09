@@ -21,7 +21,9 @@ pub struct Resources {
     pub zombie_attack_images: Vec<Image>, // 僵尸攻击动画
     pub zombie_die_images: Vec<Image>, // 僵尸死亡动作
     pub zombie_head_images: Vec<Image>, // 僵尸头掉落动作
-    // Add images for other zombie types (Conehead, Buckethead) here...
+    // 路障僵尸图像
+    pub cone_zombie_walk_images: Vec<Image>, // 路障僵尸行走动画
+    pub cone_zombie_attack_images: Vec<Image>, // 路障僵尸攻击动画
 
     // 豌豆射手的豌豆图像
     pub pea_image: Image,     // 普通豌豆
@@ -87,6 +89,10 @@ impl Resources {
         let zombie_die_images = load_animation_frames(ctx, "/zombies/ZombieDie/{}.png", 1..=10, "Zombie die")?;
         let zombie_head_images = load_animation_frames(ctx, "/zombies/ZombieHead/{}.png", 1..=12, "Zombie head fall")?;
 
+        // 加载路障僵尸图像
+        let cone_zombie_walk_images = load_animation_frames(ctx, "/zombies/ConeZombieWalk/{}.png", 1..=21, "Cone Zombie walk")?;
+        let cone_zombie_attack_images = load_animation_frames(ctx, "/zombies/ConeZombieAttack/{}.png", 1..=11, "Cone Zombie attack")?;
+
         // 加载豌豆图像
         let pea_image = Image::new(ctx, "/plants/Pea.png")?;
         // let pea_snow_image = Image::new(ctx, "/plants/PeaSnow.png")?;
@@ -106,6 +112,8 @@ impl Resources {
             zombie_attack_images,
             zombie_die_images,
             zombie_head_images,
+            cone_zombie_walk_images,
+            cone_zombie_attack_images,
             pea_image,
             // pea_snow_image,
             // Assign other potentially unloaded Vecs as empty or handle appropriately

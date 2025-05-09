@@ -35,7 +35,7 @@ impl LevelController {
             // TODO: 实现更复杂的生成逻辑，例如基于波数、时间调整类型和数量
             let mut rng = rand::thread_rng();
             let row = rng.gen_range(0..GRID_HEIGHT);
-            let zombie_type = ZombieType::Normal; // 目前只生成普通僵尸
+            let zombie_type = ZombieType::Conehead; // 目前只生成普通僵尸
 
             spawns.push(ZombieSpawnInfo { zombie_type, row });
 

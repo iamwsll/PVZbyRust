@@ -7,8 +7,8 @@ use crate::ui::grid::{GRID_START_Y, GRID_CELL_HEIGHT, GRID_CELL_WIDTH, GRID_STAR
 pub mod normal_zombie;
 pub mod zombie_trait;
 pub mod zombie_factory;
+pub mod conehead_zombie;
 // 未来可以添加
-// pub mod conehead_zombie;
 // pub mod buckethead_zombie;
 
 // 从工厂模块中重新导出僵尸类型枚举
@@ -203,13 +203,20 @@ impl Zombie {
     // 僵尸受到伤害的方法
     pub fn take_damage(&mut self, damage: i32) -> bool {
         // 先检查是否有特殊伤害处理逻辑（如路障掉落等）
-        if self.zombie_impl.handle_damage(damage) {
-            // 如果有特殊处理，可以在这里添加特效逻辑
-            // 但仍然需要减少生命值
-        }
+        let damage_handled = self.zombie_impl.handle_damage(damage);
         
-        self.health -= damage;
-        println!("僵尸受到{}点伤害，剩余生命值: {}", damage, self.health);
+        if damage_handled {
+            // 如果有特殊处理，检查是否需要更新健康值
+            if let Some(new_health) = self.zombie_impl.transform_health() {
+                // 如果需要转变健康值（例如变成普通僵尸）
+                self.health = new_health;
+                println!("僵尸转变形态，健康值重置为: {}", self.health);
+            }
+        } else {
+            // 只有当特殊处理没有应用伤害时，才减去伤害值
+            self.health -= damage;
+            println!("僵尸受到{}点伤害，剩余生命值: {}", damage, self.health);
+        }
         
         // 检查是否死亡
         if self.health <= 0 {

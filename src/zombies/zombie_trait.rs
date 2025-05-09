@@ -88,4 +88,11 @@ pub trait ZombieTrait {
         // 默认实现直接返回false，表示没有特殊处理
         false
     }
+    
+    /// 当僵尸转变形态时，返回新的生命值
+    /// 返回None表示不需要更改生命值，Some(value)表示需要将生命值更改为value
+    fn transform_health(&self) -> Option<i32> {
+        // 默认实现返回None，表示没有变形
+        None
+    }
 }

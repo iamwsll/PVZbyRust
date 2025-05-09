@@ -2,7 +2,7 @@
 use crate::zombies::zombie_trait::ZombieTrait;
 use crate::zombies::normal_zombie::NormalZombie;
 // 在这里导入其他僵尸类型
-// use crate::zombies::conehead_zombie::ConeheadZombie;
+use crate::zombies::conehead_zombie::ConeheadZombie;
 // use crate::zombies::buckethead_zombie::BucketHeadZombie;
 
 /// 僵尸类型枚举
@@ -10,7 +10,7 @@ use crate::zombies::normal_zombie::NormalZombie;
 pub enum ZombieType {
     Normal,
     // 以后添加更多僵尸类型
-    // Conehead,
+    Conehead,
     // Buckethead,
     // FootballZombie,
     // ScreenDoorZombie,
@@ -25,7 +25,7 @@ impl ZombieFactory {
         match zombie_type {
             ZombieType::Normal => Box::new(NormalZombie::new()),
             // 以后添加更多僵尸类型
-            // ZombieType::Conehead => Box::new(ConeheadZombie::new()),
+            ZombieType::Conehead => Box::new(ConeheadZombie::new()),
             // ZombieType::Buckethead => Box::new(BucketHeadZombie::new()),
         }
     }
