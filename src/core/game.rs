@@ -64,8 +64,12 @@ impl EventHandler for GameState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         // 设置游戏帧率
         const DESIRED_FPS: u32 = 60;
-        let dt = ggez::timer::delta(ctx).as_millis() as u64;
+        // 计算固定的逻辑更新时间步长 (毫秒)
+        // (1000ms / FPS) gives ms per frame.
+        const FIXED_UPDATE_DT_MS: u64 = (1000.0_f32 / DESIRED_FPS as f32) as u64;
 
+        // ggez::timer::check_update_time 会根据自上次 EventHandler::update 调用以来的时间
+        // 来决定逻辑更新循环（while 循环体）需要执行多少次，以达到 DESIRED_FPS。
         while ggez::timer::check_update_time(ctx, DESIRED_FPS) {
             if self.game_over {
                 continue;
@@ -73,24 +77,24 @@ impl EventHandler for GameState {
             
             // 更新阳光
             for sun in &mut self.suns {
-                sun.update(dt);
+                sun.update(FIXED_UPDATE_DT_MS);
             }
 
             // 更新植物并收集新产生的阳光
             let mut new_suns = Vec::new();
             for plant in &mut self.plants {
-                plant.update(dt, &mut new_suns, &mut self.peas);
+                plant.update(FIXED_UPDATE_DT_MS, &mut new_suns, &mut self.peas);
             }
             self.suns.append(&mut new_suns);
 
             // 更新僵尸
             for zombie in &mut self.zombies {
-                zombie.update(dt);
+                zombie.update(FIXED_UPDATE_DT_MS);
             }
 
             // 更新豌豆
             for pea in &mut self.peas {
-                pea.update(dt);
+                pea.update(FIXED_UPDATE_DT_MS);
             }
 
             // 处理碰撞逻辑
@@ -114,7 +118,8 @@ impl EventHandler for GameState {
             }
 
             // 通过关卡控制器更新并生成僵尸
-            let zombie_spawns = self.entity_manager.update(dt);
+            // 假设 entity_manager.update 也期望一个逻辑步长时间
+            let zombie_spawns = self.entity_manager.update(FIXED_UPDATE_DT_MS);
             for spawn_info in zombie_spawns {
                 let zombie = self.entity_manager.spawn_zombie(spawn_info.zombie_type, spawn_info.row);
                 self.zombies.push(zombie);
