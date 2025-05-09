@@ -3,7 +3,6 @@ use ggez::{ContextBuilder, GameResult};
 use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event::{self};
 
-// 重组后的模块结构
 mod core;
 mod entities;
 mod plants;

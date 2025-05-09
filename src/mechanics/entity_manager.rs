@@ -1,6 +1,5 @@
 use crate::zombies::{Zombie, ZombieType};
 use crate::entities::sun::{Sun, SunType};
-use crate::ui::grid::GRID_HEIGHT;
 use crate::mechanics::level_controller::{LevelController, ZombieSpawnInfo};
 use rand::Rng;
 

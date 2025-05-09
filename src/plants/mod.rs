@@ -1,6 +1,5 @@
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, DrawParam};
-use std::{collections::HashMap, time::Instant};
 use crate::core::resources::Resources;
 use crate::ui::grid::{GRID_START_X, GRID_START_Y, GRID_CELL_HEIGHT, GRID_CELL_WIDTH};
 use crate::entities::sun::Sun;
@@ -33,7 +32,7 @@ pub struct Plant {
 impl Plant {
     pub fn new(plant_type: PlantType, grid_x: usize, grid_y: usize) -> Self {
         // 使用工厂创建具体植物实现
-        let mut plant_impl = PlantFactory::create_plant(plant_type);
+        let plant_impl = PlantFactory::create_plant(plant_type);
         let health = plant_impl.get_initial_health();
 
         Plant {
