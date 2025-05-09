@@ -1,8 +1,8 @@
-use crate::sun::Sun;
-use crate::pea::Pea;
+use crate::entities::sun::Sun;
+use crate::entities::pea::Pea;
 use crate::plants::plant_trait::PlantTrait;
-use crate::resources::Resources;
-use ggez::graphics;
+use crate::core::resources::Resources;
+use ggez::graphics::Image;
 
 // 坚果墙植物
 pub struct WallNut;
@@ -38,11 +38,11 @@ impl PlantTrait for WallNut {
         COST
     }
     
-    fn get_card_image<'a>(&self, resources: &'a Resources) -> &'a graphics::Image {
+    fn get_card_image<'a>(&self, resources: &'a Resources) -> &'a Image {
         &resources.wallnut_card
     }
     
-    fn get_current_frame_image<'a>(&self, resources: &'a Resources, animation_frame: usize) -> &'a graphics::Image {
+    fn get_current_frame_image<'a>(&self, resources: &'a Resources, animation_frame: usize) -> &'a Image {
         let frame_count = resources.wallnut_images.len();
         if frame_count > 0 {
             let safe_index = animation_frame % frame_count;

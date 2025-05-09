@@ -1,6 +1,7 @@
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, DrawParam, Rect};
-use crate::resources::Resources;
+use crate::core::resources::Resources;
+use crate::ui::grid::{GRID_START_Y, GRID_CELL_HEIGHT, GRID_CELL_WIDTH, GRID_START_X};
 
 // 声明子模块
 pub mod normal_zombie;
@@ -100,7 +101,7 @@ impl Zombie {
                         self.head_falling = true;
                         // 设置头部初始位置，相对于僵尸的位置
                         self.head_x = self.x + 40.0; // TODO：根据僵尸图像调整头部位置的偏移量
-                        let y = crate::grid::GRID_START_Y + (self.row as f32) * crate::grid::GRID_CELL_HEIGHT - crate::grid::GRID_CELL_HEIGHT/4.0;
+                        let y = GRID_START_Y + (self.row as f32) * GRID_CELL_HEIGHT - GRID_CELL_HEIGHT/4.0;
                         self.head_y = y + 20.0; //TODO： 根据僵尸图像调整头部位置的偏移量
                     }
                 } else {
@@ -149,7 +150,7 @@ impl Zombie {
 
     pub fn draw(&self, ctx: &mut Context, resources: &Resources) -> GameResult {
         // 计算僵尸在屏幕上的 Y 坐标
-        let y = crate::grid::GRID_START_Y + (self.row as f32) * crate::grid::GRID_CELL_HEIGHT - crate::grid::GRID_CELL_HEIGHT/4.0;
+        let y = GRID_START_Y + (self.row as f32) * GRID_CELL_HEIGHT - GRID_CELL_HEIGHT/4.0;
 
         // 根据僵尸状态选择图像
         let image = if self.is_dying {
@@ -190,7 +191,7 @@ impl Zombie {
 
     // 获取僵尸的碰撞矩形
     pub fn get_rect(&self) -> Rect {
-        let y = crate::grid::GRID_START_Y + (self.row as f32) * crate::grid::GRID_CELL_HEIGHT - crate::grid::GRID_CELL_HEIGHT/4.0;
+        let y = GRID_START_Y + (self.row as f32) * GRID_CELL_HEIGHT - GRID_CELL_HEIGHT/4.0;
         
         // 僵尸的碰撞区域应该比显示的图像小一些，以使游戏更加公平 .TODO: 根据实际图像大小调整
         let width = 20.0;
@@ -247,14 +248,14 @@ impl Zombie {
         }
         
         // 获取植物的屏幕坐标 (左边缘),这个位置是微调出来的
-        let plant_left_edge = crate::grid::GRID_START_X + (plant_grid_x as f32) * crate::grid::GRID_CELL_WIDTH - crate::grid::GRID_CELL_WIDTH;
+        let plant_left_edge = GRID_START_X + (plant_grid_x as f32) * GRID_CELL_WIDTH - GRID_CELL_WIDTH;
         
         // 获取僵尸的前部坐标 (右边缘)
         let zombie_right_edge = self.x + 20.0; // TODO:根据僵尸大小调整
         
         // 如果僵尸的右边缘达到或超过植物的左边缘，则视为碰撞
         // 通常加一个小的偏移量使碰撞更接近图形效果
-        zombie_right_edge >= plant_left_edge && zombie_right_edge <= plant_left_edge + crate::grid::GRID_CELL_WIDTH
+        zombie_right_edge >= plant_left_edge && zombie_right_edge <= plant_left_edge + GRID_CELL_WIDTH
     }
     
     // 设置攻击状态

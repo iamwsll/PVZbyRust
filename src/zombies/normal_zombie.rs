@@ -1,7 +1,7 @@
 // src/zombies/normal_zombie.rs
 use crate::zombies::zombie_trait::ZombieTrait;
-use crate::resources::Resources;
 use ggez::graphics::{Image, DrawParam};
+use crate::core::resources::Resources;
 
 // 普通僵尸的特定属性
 const INITIAL_HEALTH: i32 = 200;

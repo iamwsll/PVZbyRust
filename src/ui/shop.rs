@@ -1,7 +1,7 @@
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, DrawParam, Color, Rect};
 use crate::plants::{PlantType, PlantFactory};
-use crate::resources::Resources;
+use crate::core::resources::Resources;
 use std::time::{Duration, Instant};
 
 // 卡片在商店中的尺寸

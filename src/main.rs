@@ -3,16 +3,13 @@ use ggez::{ContextBuilder, GameResult};
 use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event::{self};
 
-mod game;
-mod resources;
+// 重组后的模块结构
+mod core;
+mod entities;
 mod plants;
-mod zombies; // Add zombies module
-mod sun;
-mod grid;
-mod shop;
-mod level_controller; // level_controller 模块,用来控制游戏僵尸进度
-mod pea; // 豌豆射手的子弹
-
+mod zombies;
+mod mechanics;
+mod ui;
 
 // 设计时的窗口尺寸，作为缩放参考基准
 pub const DESIGN_WIDTH: f32 = 1400.0;
@@ -37,6 +34,6 @@ fn main() -> GameResult {
             )
         .build()?;
 
-    let game_state = game::GameState::new(&mut ctx)?;
+    let game_state = core::game::GameState::new(&mut ctx)?;
     event::run(ctx, event_loop, game_state)
 }

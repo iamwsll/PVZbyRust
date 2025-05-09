@@ -1,7 +1,7 @@
 // src/zombies/zombie_trait.rs
-use crate::resources::Resources;
+use crate::core::resources::Resources;
 use ggez::{Context, GameResult};
-use ggez::graphics::{Image, DrawParam};
+use ggez::graphics::{DrawParam, Image};
 
 /// 僵尸特性，定义所有僵尸需要实现的方法
 pub trait ZombieTrait {

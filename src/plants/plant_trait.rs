@@ -1,7 +1,7 @@
-use crate::resources::Resources;
-use crate::sun::Sun;
-use crate::pea::Pea;
-use ggez::graphics;
+use crate::core::resources::Resources;
+use crate::entities::sun::Sun;
+use crate::entities::pea::Pea;
+use ggez::{GameResult, Context, graphics::Image};
 
 /// 植物特性，定义所有植物需要实现的方法
 pub trait PlantTrait {
@@ -21,10 +21,10 @@ pub trait PlantTrait {
     fn get_cost(&self) -> i32;
     
     /// 获取植物的卡片图像
-    fn get_card_image<'a>(&self, resources: &'a Resources) -> &'a graphics::Image;
+    fn get_card_image<'a>(&self, resources: &'a Resources) -> &'a Image;
     
     /// 获取当前植物动画帧对应的图像
-    fn get_current_frame_image<'a>(&self, resources: &'a Resources, animation_frame: usize) -> &'a graphics::Image;
+    fn get_current_frame_image<'a>(&self, resources: &'a Resources, animation_frame: usize) -> &'a Image;
     
     /// 植物的损坏状态（如坚果墙的不同损坏阶段）
     fn get_damage_state(&self, health: i32, max_health: i32) -> usize {

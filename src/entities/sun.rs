@@ -1,6 +1,6 @@
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, DrawParam};
-use crate::resources::Resources;
+use crate::core::resources::Resources;
 
 pub enum SunType {
     NaturalGeneration,

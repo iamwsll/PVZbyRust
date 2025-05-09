@@ -1,7 +1,7 @@
 use crate::zombies::ZombieType;
 use std::time::{Duration, Instant};
 use rand::Rng;
-use crate::grid::GRID_HEIGHT;
+use crate::ui::grid::GRID_HEIGHT;
 
 // 定义僵尸生成信息
 pub struct ZombieSpawnInfo {

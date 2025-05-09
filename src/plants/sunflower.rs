@@ -1,8 +1,8 @@
-use crate::grid::{GRID_CELL_HEIGHT, GRID_CELL_WIDTH, GRID_START_X, GRID_START_Y};
-use crate::sun::{Sun, SunType};
-use crate::pea::Pea;
+use crate::ui::grid::{GRID_CELL_HEIGHT, GRID_CELL_WIDTH, GRID_START_X, GRID_START_Y};
+use crate::entities::sun::{Sun, SunType};
+use crate::entities::pea::Pea;
 use crate::plants::plant_trait::PlantTrait;
-use crate::resources::Resources;
+use crate::core::resources::Resources;
 use ggez::graphics;
 
 /// 向日葵植物
