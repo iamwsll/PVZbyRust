@@ -1,6 +1,6 @@
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, DrawParam, Color, Rect};
-use crate::plants::PlantType;
+use crate::plants::{PlantType, PlantFactory};
 use crate::resources::Resources;
 use std::time::{Duration, Instant};
 
@@ -51,25 +51,22 @@ impl PlantCard {
     /// @param sun_count 当前阳光数量
     /// @note 如果植物卡片在冷却中，则不可用
     pub fn update(&mut self, sun_count: i32) {
-        // 检查冷却时间 这里额外处理了第一次使用时的情况
-        if let Some(last_used) = self.last_used {// 如果有上次使用时间
-            if last_used.elapsed() < self.cooldown {// 还在冷却中
+        // 检查冷却时间
+        if let Some(last_used) = self.last_used {
+            if last_used.elapsed() < self.cooldown {
                 self.available = false;
-            } else {// 冷却结束
+            } else {
                 self.available = sun_count >= self.plant_type.cost();
             }
         } else {
-            self.available = sun_count >= self.plant_type.cost();// 第一次使用时，直接可用
+            self.available = sun_count >= self.plant_type.cost();
         }
     }
 
     pub fn draw(&self, ctx: &mut Context, resources: &Resources) -> GameResult {
-        // 绘制卡片背景
-        let card_image = match self.plant_type {
-            PlantType::Peashooter => &resources.peashooter_card,
-            PlantType::Sunflower => &resources.sunflower_card,
-            PlantType::WallNut => &resources.wallnut_card,
-        };
+        // 创建一个临时的植物实例来获取卡片图像
+        let plant = PlantFactory::create_plant(self.plant_type);
+        let card_image = plant.get_card_image(resources);
         
         // 绘制卡片
         graphics::draw(
@@ -160,11 +157,10 @@ impl Shop {
             let mouse_pos = ggez::input::mouse::position(ctx);
             let x = mouse_pos.x;
             let y = mouse_pos.y;
-            let image = match plant_type {
-                PlantType::Peashooter => &resources.peashooter_images[0],
-                PlantType::Sunflower => &resources.sunflower_images[0],
-                PlantType::WallNut => &resources.wallnut_images[0],
-            };
+            
+            // 创建一个临时的植物实例来获取预览图像
+            let plant = PlantFactory::create_plant(plant_type);
+            let image = plant.get_current_frame_image(resources, 0); // 使用第一帧作为预览
             
             graphics::draw(
                 ctx,

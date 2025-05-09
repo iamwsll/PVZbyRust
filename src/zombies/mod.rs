@@ -3,26 +3,27 @@ use ggez::graphics::{self, DrawParam, Rect};
 use crate::resources::Resources;
 
 // 声明子模块
-pub mod normal;
-// pub mod conehead; // 未来可以添加
-// pub mod buckethead; // 未来可以添加
+pub mod normal_zombie;
+pub mod zombie_trait;
+pub mod zombie_factory;
+// 未来可以添加
+// pub mod conehead_zombie;
+// pub mod buckethead_zombie;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum ZombieType {
-    Normal,
-    // Conehead,
-    // Buckethead,
-}
+// 从工厂模块中重新导出僵尸类型枚举
+pub use zombie_factory::{ZombieType, ZombieFactory};
 
+// 僵尸结构体，持有具体僵尸实现
 pub struct Zombie {
     zombie_type: ZombieType,
     pub row: usize,
     pub x: f32, // Make x public for game logic access
     health: i32,
+    max_health: i32, // 记录最大生命值，用于特殊效果
     speed: f32,
     animation_frame: usize,
     animation_timer: u64,
-    attacking: bool, // 僵尸是否在攻击 (未来用于与植物交互)
+    attacking: bool, // 僵尸是否在攻击
     pub is_dying: bool, // 僵尸是否正在死亡（播放死亡动画）
     pub death_animation_complete: bool, // 死亡动画是否播放完成
     
@@ -38,21 +39,28 @@ pub struct Zombie {
     head_animation_timer: u64, // 头部动画计时器
     head_x: f32, // 头部X坐标
     head_y: f32, // 头部Y坐标
+    
+    // 具体僵尸实现
+    zombie_impl: Box<dyn zombie_trait::ZombieTrait>,
 }
 
 impl Zombie {
     pub fn new(zombie_type: ZombieType, row: usize) -> Self {
-        let (health, speed ,attack_damage,attack_interval) = match zombie_type {
-            ZombieType::Normal => (normal::INITIAL_HEALTH, normal::SPEED , normal::ATTACK_DAMAGE, normal::ATTACK_INTERVAL),
-            // ZombieType::Conehead => (conehead::INITIAL_HEALTH, conehead::SPEED),
-            // ZombieType::Buckethead => (buckethead::INITIAL_HEALTH, buckethead::SPEED),
-        };
+        // 使用工厂创建具体僵尸实现
+        let zombie_impl = ZombieFactory::create_zombie(zombie_type);
+        
+        // 获取僵尸基本属性
+        let health = zombie_impl.get_initial_health();
+        let speed = zombie_impl.get_speed();
+        let attack_damage = zombie_impl.get_attack_damage();
+        let attack_interval = zombie_impl.get_attack_interval();
 
         Zombie {
             zombie_type,
             row,
-            x: 950.0, // 从屏幕更右侧开始，确保完全在屏幕外生成
+            x: 950.0, // 从屏幕右侧开始，确保完全在屏幕外生成
             health,
+            max_health: health, // 初始时最大生命值等于当前生命值
             speed,
             animation_frame: 0,
             animation_timer: 0,
@@ -61,8 +69,8 @@ impl Zombie {
             death_animation_complete: false,
             
             // 初始化攻击相关字段
-            attack_damage,     // 默认攻击伤害
-            attack_interval, // 默认攻击间隔为1000毫秒（1秒）
+            attack_damage,
+            attack_interval,
             attack_timer: 0,
             attack_target: None,
             
@@ -72,6 +80,9 @@ impl Zombie {
             head_animation_timer: 0,
             head_x: 0.0,
             head_y: 0.0,
+            
+            // 具体僵尸实现
+            zombie_impl,
         }
     }
 
@@ -114,85 +125,50 @@ impl Zombie {
             return; // 正在死亡时不执行其他更新逻辑
         }
 
-        // 行走动画更新 (通用逻辑)
+        // 行走动画更新
         self.animation_timer += dt;
-        if self.animation_timer > 200 { // 动画切换速度，每200ms绘制动画的一帧。
-            // 根据僵尸类型和状态选择不同的动画帧范围
-            let frame_count = 22; // 默认行走动画有22帧
+        if self.animation_timer > 200 {
+            let frame_count = if self.attacking {
+                self.zombie_impl.get_attack_frame_count()
+            } else {
+                self.zombie_impl.get_walk_frame_count()
+            };
+            
             self.animation_frame = (self.animation_frame + 1) % frame_count;
             self.animation_timer = 0;
         }
 
-        // 移动逻辑 (通用逻辑)
+        // 移动逻辑
         if !self.attacking {
             self.x -= self.speed * dt as f32;
         }
 
-        // //TODO: 调用特定僵尸的更新逻辑 (如果需要)
-        // match self.zombie_type {
-        //     ZombieType::Normal => normal::update(),
-        //     _ => {}
-        // }
-
+        // 调用特定僵尸的更新逻辑
+        self.zombie_impl.update_special(dt);
     }
 
     pub fn draw(&self, ctx: &mut Context, resources: &Resources) -> GameResult {
-        // 计算僵尸在屏幕上的 Y 坐标 (通用逻辑)
+        // 计算僵尸在屏幕上的 Y 坐标
         let y = crate::grid::GRID_START_Y + (self.row as f32) * crate::grid::GRID_CELL_HEIGHT - crate::grid::GRID_CELL_HEIGHT/4.0;
 
         // 根据僵尸状态选择图像
         let image = if self.is_dying {
             // 使用死亡动画
-            let frame_count = resources.zombie_die_images.len();
-            if frame_count > 0 && self.animation_frame < frame_count {
-                &resources.zombie_die_images[self.animation_frame]
-            } else {
-                println!("No death animation frame available at index {}", self.animation_frame);
-                // 如果没有对应的死亡帧，使用最后一帧
-                if !resources.zombie_die_images.is_empty() {
-                    &resources.zombie_die_images[resources.zombie_die_images.len() - 1]
-                } else {
-                    // 如果没有死亡动画，回退到行走动画的第一帧
-                    &resources.zombies_walk1_images[0]
-                }
-            }
+            self.zombie_impl.get_die_image(resources, self.animation_frame)
+        } else if self.attacking {
+            // 使用攻击动画
+            self.zombie_impl.get_attack_image(resources, self.animation_frame)
         } else {
-            // 非死亡状态，使用普通行走/攻击动画
-            match self.zombie_type {
-                ZombieType::Normal => {
-                    // 根据 attacking 状态选择行走或攻击动画
-                    if self.attacking {
-                        // 使用攻击动画
-                        let attack_frame_count = resources.zombie_attack_images.len();
-                        if attack_frame_count > 0 {
-                            &resources.zombie_attack_images[self.animation_frame % attack_frame_count]
-                        } else {
-                            println!("No attack images available for Normal Zombie");
-                            &resources.zombies_walk1_images[0]
-                        }
-                    } else {
-                        // 使用行走动画
-                        let walk_frame_count = resources.zombies_walk1_images.len();
-                        if walk_frame_count > 0 {
-                            &resources.zombies_walk1_images[self.animation_frame % walk_frame_count]
-                        } else {
-                            println!("No images available for Normal Zombie");
-                            &resources.zombies_walk1_images[0]
-                        }
-                    }
-                }
-                // 处理其他僵尸类型...
-            }
+            // 使用行走动画
+            self.zombie_impl.get_walk_image(resources, self.animation_frame)
         };
 
+        // 获取僵尸特定的绘制参数
+        let mut draw_params = self.zombie_impl.get_draw_params();
+        draw_params = draw_params.dest([self.x, y]);
+
         // 绘制僵尸主体
-        graphics::draw(
-            ctx,
-            image,
-            DrawParam::default()
-                .dest([self.x, y])
-                .scale([0.8, 0.8]), // 僵尸图像缩放比例
-        )?;
+        graphics::draw(ctx, image, draw_params)?;
         
         // 如果头部正在掉落，绘制头部动画
         if self.head_falling && !self.death_animation_complete {
@@ -225,6 +201,12 @@ impl Zombie {
     
     // 僵尸受到伤害的方法
     pub fn take_damage(&mut self, damage: i32) -> bool {
+        // 先检查是否有特殊伤害处理逻辑（如路障掉落等）
+        if self.zombie_impl.handle_damage(damage) {
+            // 如果有特殊处理，可以在这里添加特效逻辑
+            // 但仍然需要减少生命值
+        }
+        
         self.health -= damage;
         println!("僵尸受到{}点伤害，剩余生命值: {}", damage, self.health);
         
@@ -265,7 +247,7 @@ impl Zombie {
         }
         
         // 获取植物的屏幕坐标 (左边缘),这个位置是微调出来的
-        let plant_left_edge = crate::grid::GRID_START_X + (plant_grid_x as f32) * crate::grid::GRID_CELL_WIDTH - crate::grid::GRID_CELL_WIDTH ;
+        let plant_left_edge = crate::grid::GRID_START_X + (plant_grid_x as f32) * crate::grid::GRID_CELL_WIDTH - crate::grid::GRID_CELL_WIDTH;
         
         // 获取僵尸的前部坐标 (右边缘)
         let zombie_right_edge = self.x + 20.0; // TODO:根据僵尸大小调整
@@ -288,5 +270,10 @@ impl Zombie {
                 self.attack_timer = 0;
             }
         }
+    }
+    
+    // 获取僵尸类型
+    pub fn get_zombie_type(&self) -> ZombieType {
+        self.zombie_type
     }
 }
