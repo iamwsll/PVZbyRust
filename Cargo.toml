@@ -3,8 +3,8 @@ name = "pvz_rust_wsll"
 version = "0.1.0"
 edition = "2021"
 authors = ["1481121704@qq.com"]
-description = "rust版植物大战僵尸.目前未完成"  # 添加描述
-license = "MIT"  # 或 "Apache-2.0", "MIT/Apache-2.0" 等开源许可证
+description = "rust版植物大战僵尸.目前未完成" 
+license = "MIT"  
 [dependencies]
 ggez = "0.7"
 rand = "0.8"
