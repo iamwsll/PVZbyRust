@@ -7,12 +7,8 @@ use ggez::{ContextBuilder, GameResult};
 use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event::{self};
 
-mod core;
-mod entities;
-mod plants;
-mod zombies;
-mod mechanics;
-mod ui;
+// 导入库
+use pvz_rust_wsll_lib::core; 
 
 /// 设计时的窗口宽度，作为缩放参考基准
 pub const DESIGN_WIDTH: f32 = 1400.0;
@@ -31,7 +27,7 @@ fn main() -> GameResult {
         PathBuf::from("./Resource")
     };
 
-    let (mut ctx, event_loop) = ContextBuilder::new("pvz_rust", "wsll")
+    let (mut ctx, event_loop) = ContextBuilder::new("pvz_rust_wsll_game", "wsll") 
         .add_resource_path(resource_dir)
         .window_setup(WindowSetup::default().title("植物大战僵尸 - Rust版"))
         .window_mode(WindowMode::default()

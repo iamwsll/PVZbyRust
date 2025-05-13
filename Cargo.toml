@@ -1,10 +1,20 @@
 [package]
 name = "pvz_rust_wsll"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["1481121704@qq.com"]
-description = "rust版植物大战僵尸.目前未完成" 
-license = "MIT"  
+description = "一个用 Rust 实现的植物大战僵尸风格游戏的库和可执行程序。"
+license = "MIT"
+readme = "README.md"
+
+[lib]
+name = "pvz_rust_wsll_lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "pvz_rust_wsll_game"
+path = "src/main.rs"
+
 [dependencies]
 ggez = "0.7"
 rand = "0.8"
