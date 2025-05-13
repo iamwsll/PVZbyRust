@@ -1822,7 +1822,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pvz_rust"
+name = "pvz_rust_wsll"
 version = "0.1.0"
 dependencies = [
  "ggez",
