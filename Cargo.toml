@@ -2,7 +2,7 @@
 name = "pvz_rust"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name"]
+authors = ["1481121704@qq.com"]
 
 [dependencies]
 ggez = "0.7"
