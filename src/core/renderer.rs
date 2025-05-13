@@ -1,3 +1,8 @@
+//! # 渲染模块
+//!
+//! `renderer` 模块负责游戏的所有渲染任务。
+//! 它包含了将游戏状态（如植物、僵尸、子弹、UI元素等）绘制到屏幕上的所有逻辑。
+
 use crate::core::resources::Resources;
 use crate::ui::grid::Grid;
 use crate::plants::Plant;
@@ -8,11 +13,35 @@ use crate::ui::shop::Shop;
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, Color, DrawParam, Text, TextFragment};
 
-/// 渲染管理模块，负责处理游戏中的所有绘制逻辑
+/// 渲染器结构体，封装了所有与游戏场景绘制相关的操作。
+///
+/// `Renderer` 是一个无状态的结构体，其方法通常接收绘图上下文 (`Context`)、
+/// 游戏资源 (`Resources`) 以及需要绘制的游戏实体和UI元素作为参数。
 pub struct Renderer;
 
 impl Renderer {
-    /// 绘制整个游戏画面
+    /// 绘制完整的游戏场景。
+    ///
+    /// 此函数是主要的绘制入口，它会按顺序调用其他辅助绘制函数来渲染游戏的各个层面，
+    /// 包括背景、网格、植物、豌豆、僵尸、阳光、UI元素，以及游戏结束画面（如果适用）。
+    /// 最后，它将所有绘制内容呈现到屏幕上。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境，用于绘图操作。
+    /// * `resources` - 包含所有已加载图像资源的 `Resources` 实例。
+    /// * `grid` - 游戏网格，用于辅助定位和可能的调试绘制。
+    /// * `plants` - 当前场景中所有植物的切片。
+    /// * `peas` - 当前场景中所有豌豆的切片。
+    /// * `zombies` - 当前场景中所有僵尸的切片。
+    /// * `suns` - 当前场景中所有阳光的切片。
+    /// * `shop` - 游戏商店实例，用于绘制商店UI。
+    /// * `sun_count` - 当前玩家拥有的阳光数量。
+    /// * `game_over` - 一个布尔值，指示游戏是否已结束。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，表示绘制操作是否成功。
     pub fn draw_game(
         ctx: &mut Context, 
         resources: &Resources,
@@ -68,7 +97,16 @@ impl Renderer {
         Ok(())
     }
     
-    /// 绘制背景
+    /// 绘制游戏背景，包括主背景图和商店面板。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境。
+    /// * `resources` - 包含背景和商店图像的 `Resources` 实例。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，表示绘制操作是否成功。
     fn draw_background(ctx: &mut Context, resources: &Resources) -> GameResult {
         // 绘制主背景
         graphics::draw(ctx, &resources.background, DrawParam::default())?;
@@ -83,7 +121,18 @@ impl Renderer {
         Ok(())
     }
     
-    /// 绘制UI元素
+    /// 绘制用户界面（UI）元素，主要包括商店和阳光数量显示。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境。
+    /// * `resources` - `Resources` 实例，主要用于商店绘制时传递给商店的 `draw` 方法。
+    /// * `shop` - 游戏商店实例。
+    /// * `sun_count` - 当前玩家拥有的阳光数量，用于显示。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，表示绘制操作是否成功。
     fn draw_ui(ctx: &mut Context, resources: &Resources, shop: &Shop, sun_count: i32) -> GameResult {
         // 绘制商店卡片和选中植物预览
         shop.draw(ctx, resources)?;
@@ -104,7 +153,17 @@ impl Renderer {
         Ok(())
     }
     
-    /// 绘制游戏结束画面
+    /// 绘制游戏结束画面。
+    ///
+    /// 当游戏结束时，在屏幕中央显示 "GAME OVER" 文本。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，表示绘制操作是否成功。
     fn draw_game_over(ctx: &mut Context) -> GameResult {
         let game_over_text = Text::new(
             TextFragment::new("GAME OVER")

@@ -1,13 +1,33 @@
+//! # 碰撞检测模块 (`collision`)
+//!
+//! 本模块负责处理游戏中不同实体之间的碰撞检测及相应的逻辑响应。
+//! 例如，豌豆与僵尸的碰撞会导致僵尸受伤和豌豆消失；僵尸与植物的碰撞会导致植物受损以及僵尸进入攻击状态。
+
 use crate::entities::pea::Pea;
 use crate::plants::Plant;
 use crate::zombies::Zombie;
 use ggez::{Context, timer};
 
-/// 碰撞检测模块，负责处理游戏中的碰撞检测相关逻辑
+/// 碰撞管理器结构体。
+///
+/// 这是一个无状态的工具结构体，提供了静态方法来处理不同类型的碰撞事件。
 pub struct CollisionManager;
 
 impl CollisionManager {
-    /// 处理豌豆和僵尸的碰撞
+    /// 处理豌豆与僵尸之间的碰撞。
+    ///
+    /// 遍历所有活动的豌豆和未处于死亡动画中的僵尸：
+    /// 1. 检查它们是否在同一行。
+    /// 2. 检查豌豆的x坐标是否已达到或超过僵尸的x坐标（粗略检测）。
+    /// 3. 如果满足以上条件，则获取两者的精确碰撞矩形并检查是否重叠。
+    /// 4. 如果发生碰撞，僵尸受到伤害，豌豆被标记为非活动状态并记录下来。
+    ///
+    /// 完成遍历后，移除所有非活动的豌豆，并移除所有死亡动画已完成的僵尸。
+    ///
+    /// # Arguments
+    ///
+    /// * `peas` - 一个可变的豌豆向量引用，包含游戏中所有的豌豆。
+    /// * `zombies` - 一个可变的僵尸向量引用，包含游戏中所有的僵尸。
     pub fn handle_pea_zombie_collision(peas: &mut Vec<Pea>, zombies: &mut Vec<Zombie>) {
         let mut inactive_peas = Vec::new();
     
@@ -58,7 +78,22 @@ impl CollisionManager {
         zombies.retain(|zombie| !zombie.death_animation_complete);
     }
 
-    /// 处理僵尸和植物的交互
+    /// 处理僵尸与植物之间的交互（主要是攻击）。
+    ///
+    /// 遍历所有未死亡的僵尸：
+    /// 1. 对每个僵尸，遍历所有未死亡的植物。
+    /// 2. 检查僵尸是否在其正前方（同一行且x坐标接近）遇到植物。
+    /// 3. 如果遇到，则将僵尸设置为攻击状态，记录攻击目标，并使僵尸对植物造成伤害。
+    /// 4. 检查植物在受到伤害后是否死亡，如果死亡则标记。
+    /// 5. 一个僵尸同时只能攻击一个植物，一旦找到目标则停止对当前僵尸的植物搜索。
+    ///
+    /// 完成遍历后，更新所有僵尸的攻击状态，并移除所有已死亡的植物。
+    ///
+    /// # Arguments
+    ///
+    /// * `zombies` - 一个可变的僵尸向量引用。
+    /// * `plants` - 一个可变的植物向量引用。
+    /// * `ctx` - ggez的上下文环境，主要用于获取时间增量以计算攻击伤害。
     pub fn handle_zombie_plant_interaction(zombies: &mut Vec<Zombie>, plants: &mut Vec<Plant>, ctx: &mut Context) {
         // 遍历所有僵尸
         for zombie in zombies {

@@ -1,3 +1,8 @@
+//! # 游戏主逻辑模块
+//! 
+//! `game` 模块负责实现游戏的主要逻辑，包括游戏状态的初始化、更新、绘制以及事件处理。
+//! 它作为游戏的核心控制器，协调各个子系统的工作。
+
 use crate::ui::grid::Grid;
 use crate::plants::PlantType;
 use crate::core::resources::Resources;
@@ -15,29 +20,49 @@ use ggez::event::EventHandler;
 use ggez::input::mouse::MouseButton;
 use ggez::{Context, GameResult};
 
-/// 游戏状态结构体，包含游戏运行所需的所有状态
+/// 游戏状态结构体，封装了游戏世界中的所有动态数据和状态。
+///
+/// `GameState` 负责管理游戏中的各种实体（如植物、僵尸、阳光、豌豆）、
+/// 玩家状态（如阳光数量、当前选中的植物）、游戏进程（如是否结束）以及
+/// 与游戏核心机制相关的模块（如商店、实体管理器）。
 pub struct GameState {
-    // 资源
+    /// 游戏资源，如图形和声音。
     resources: Resources,
     
-    // 游戏实体
+    /// 游戏区域的网格布局。
     grid: Grid,
+    /// 当前场景中所有植物的集合。
     plants: Vec<Plant>,
+    /// 当前场景中所有僵尸的集合。
     zombies: Vec<Zombie>,
+    /// 当前场景中所有阳光的集合。
     suns: Vec<Sun>,
+    /// 当前场景中所有豌豆的集合。
     peas: Vec<Pea>,
     
-    // 游戏状态
+    /// 玩家当前的阳光数量。
     sun_count: i32,
+    /// 玩家当前从商店选中的待放置植物类型。
     selected_plant: Option<PlantType>,
+    /// 标记游戏是否已经结束。
     game_over: bool,
     
-    // 功能模块
+    /// 游戏商店，用于购买植物。
     shop: Shop,
+    /// 实体管理器，负责生成新的实体，如自然掉落的阳光和来袭的僵尸。
     entity_manager: EntityManager,
 }
 
 impl GameState {
+    /// 创建并初始化一个新的 `GameState` 实例。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境，用于加载资源等。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，其中包含初始化完成的 `GameState` 实例或者一个错误。
     pub fn new(ctx: &mut Context) -> GameResult<GameState> {
         let resources = Resources::new(ctx)?;
         let grid = Grid::new();
@@ -61,6 +86,19 @@ impl GameState {
 }
 
 impl EventHandler for GameState {
+    /// 更新游戏状态，此方法会在每一帧被调用。
+    ///
+    /// 负责处理游戏逻辑的更新，包括实体（植物、僵尸、豌豆、阳光）的状态更新、
+    /// 碰撞检测、实体生成、游戏结束条件判断以及商店状态的更新。
+    /// 使用固定的时间步长（FIXED_UPDATE_DT_MS）来确保游戏逻辑更新的稳定性。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，表示更新操作是否成功。
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         // 设置游戏帧率
         const DESIRED_FPS: u32 = 60;
@@ -132,6 +170,18 @@ impl EventHandler for GameState {
         Ok(())
     }
 
+    /// 绘制游戏画面，此方法会在每一帧的更新之后被调用。
+    ///
+    /// 通过调用 `Renderer` 模块来绘制游戏背景、网格、所有实体（植物、豌豆、僵尸、阳光）、
+    /// UI元素（商店、阳光数量）以及游戏结束画面（如果适用）。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，表示绘制操作是否成功。
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         Renderer::draw_game(
             ctx,
@@ -147,6 +197,17 @@ impl EventHandler for GameState {
         )
     }
 
+    /// 处理鼠标按键按下事件。
+    ///
+    /// 当玩家点击鼠标时，此方法被调用。它将事件委托给 `InputHandler` 来处理，
+    /// 例如处理阳光的收集、商店卡片的选择、植物的放置或取消选择等操作。
+    ///
+    /// # Arguments
+    ///
+    /// * `_ctx` - ggez的上下文环境 (在此方法中未使用)。
+    /// * `button` - 被按下的鼠标按键。
+    /// * `x` - 鼠标点击位置的x坐标。
+    /// * `y` - 鼠标点击位置的y坐标。
     fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
         InputHandler::handle_mouse_down(
             button, 

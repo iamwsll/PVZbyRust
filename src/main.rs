@@ -1,3 +1,7 @@
+//! # 植物大战僵尸 Rust 版
+//!
+//! 这是一个使用 Rust 和 ggez 游戏引擎开发的植物大战僵尸游戏。
+
 use std::path::PathBuf;
 use ggez::{ContextBuilder, GameResult};
 use ggez::conf::{WindowMode, WindowSetup};
@@ -10,11 +14,14 @@ mod zombies;
 mod mechanics;
 mod ui;
 
-// 设计时的窗口尺寸，作为缩放参考基准
+/// 设计时的窗口宽度，作为缩放参考基准
 pub const DESIGN_WIDTH: f32 = 1400.0;
+/// 设计时的窗口高度，作为缩放参考基准
 pub const DESIGN_HEIGHT: f32 = 600.0;
 
-
+/// 程序主入口函数
+///
+/// 初始化游戏资源、窗口，并启动游戏循环。
 fn main() -> GameResult {
     let resource_dir = if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
         let mut path = PathBuf::from(manifest_dir);

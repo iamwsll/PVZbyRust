@@ -1,39 +1,76 @@
+//! # 资源管理模块
+//!
+//! `resources` 模块负责加载和管理游戏所需的各种资源，如图片、字体等。
+//! 它提供了一个统一的接口来访问这些资源，简化了游戏其他部分的资源处理逻辑。
+
 use ggez::graphics::Image;
 use ggez::{Context, GameResult};
 use std::path::Path;
 
+/// 存储所有游戏资源，如图像和字体。
+///
+/// 这个结构体在游戏启动时被实例化，并加载所有必要的视觉资源。
+/// 之后，游戏的其他部分可以通过这个结构体来访问这些资源。
 pub struct Resources {
-    // 背景和ui
+    // 背景和UI元素
+    /// 游戏主背景图片。
     pub background: Image,
+    /// 商店界面的背景图片。
     pub shop_image: Image,
-    pub sun_images: Vec<Image>, // Keep sun animation frames
+    /// 太阳的动画帧序列。
+    pub sun_images: Vec<Image>,
 
-    // 植物图像，包括动画帧和商店中的card
+    // 植物相关图像
+    /// 豌豆射手的动画帧序列。
     pub peashooter_images: Vec<Image>,
+    /// 向日葵的动画帧序列。
     pub sunflower_images: Vec<Image>,
+    /// 坚果墙的动画帧序列。
     pub wallnut_images: Vec<Image>,
+    /// 商店中豌豆射手的卡片图像。
     pub peashooter_card: Image,
+    /// 商店中向日葵的卡片图像。
     pub sunflower_card: Image,
+    /// 商店中坚果墙的卡片图像。
     pub wallnut_card: Image,
 
-    // 僵尸图像
-    pub zombies_walk1_images: Vec<Image>, //僵尸行走动作1
-    pub zombie_attack_images: Vec<Image>, // 僵尸攻击动画
-    pub zombie_die_images: Vec<Image>, // 僵尸死亡动作
-    pub zombie_head_images: Vec<Image>, // 僵尸头掉落动作
+    // 僵尸相关图像
+    /// 普通僵尸行走动画帧序列。
+    pub zombies_walk1_images: Vec<Image>,
+    /// 普通僵尸攻击动画帧序列。
+    pub zombie_attack_images: Vec<Image>,
+    /// 普通僵尸死亡动画帧序列。
+    pub zombie_die_images: Vec<Image>,
+    /// 普通僵尸头部掉落动画帧序列。
+    pub zombie_head_images: Vec<Image>,
     // 路障僵尸图像
-    pub cone_zombie_walk_images: Vec<Image>, // 路障僵尸行走动画
-    pub cone_zombie_attack_images: Vec<Image>, // 路障僵尸攻击动画
+    /// 路障僵尸行走动画帧序列。
+    pub cone_zombie_walk_images: Vec<Image>,
+    /// 路障僵尸攻击动画帧序列。
+    pub cone_zombie_attack_images: Vec<Image>,
 
-    // 豌豆射手的豌豆图像
-    pub pea_image: Image,     // 普通豌豆
-    // pub pea_snow_image: Image, // 寒冰豌豆
+    // 豌豆相关图像
+    /// 普通豌豆的图像。
+    pub pea_image: Image,
+    // /// 寒冰豌豆的图像。 (暂未使用)
+    // pub pea_snow_image: Image,
 
-    // Font (Optional, if needed for custom text rendering)
+    // 字体 (可选, 如果需要自定义文本渲染)
     // pub font: Font,
 }
 
-// 加载动画帧的帮助函数
+/// 加载一系列动画帧的辅助函数。
+///
+/// # Arguments
+///
+/// * `ctx` - ggez的上下文环境。
+/// * `path_pattern` - 图像文件的路径模式，其中 `{}` 会被帧号替换。
+/// * `frame_count` - 一个表示帧号范围的迭代器 (例如 `1..=10`)。
+/// * `asset_name` - 资源的名称，用于在加载失败时打印警告信息。
+///
+/// # Returns
+///
+/// 返回一个 `GameResult`，其中包含一个 `Vec<Image>` (加载的动画帧) 或者一个错误。
 fn load_animation_frames(
     ctx: &mut Context,
     path_pattern: &str,
@@ -61,6 +98,15 @@ fn load_animation_frames(
 
 
 impl Resources {
+    /// 创建并初始化 `Resources` 结构体，加载所有游戏资源。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，其中包含初始化完成的 `Resources` 实例或者一个错误。
     pub fn new(ctx: &mut Context) -> GameResult<Resources> {
         // Load background and UI
         let background = Image::new(ctx, "/other_image/Background.png")?;
