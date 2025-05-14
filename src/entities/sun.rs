@@ -37,6 +37,14 @@ pub struct Sun {
     animation_timer: u64,
     /// 阳光的生成类型（自然掉落或向日葵产生）。
     sun_type: SunType,
+    /// 向日葵阳光的初始y坐标，用于跳跃动画
+    initial_y: f32,
+    /// 向日葵阳光的跳跃高度
+    jump_height: f32,
+    /// 向日葵阳光的跳跃阶段 (0-100表示百分比)
+    jump_phase: f32,
+    /// 向日葵阳光的跳跃速度
+    jump_speed: f32,
 }
 
 impl Sun {
@@ -63,6 +71,10 @@ impl Sun {
             animation_frame: 0,
             animation_timer: 0,
             sun_type: gen_sun_type,
+            initial_y: y,
+            jump_height: 20.0, // 跳跃高度，稍微增加使动画更明显
+            jump_phase: 0.0,   // 初始为0
+            jump_speed: 0.2,   // 跳跃速度，加快以使动画更快完成
         }
     }
 
@@ -89,8 +101,29 @@ impl Sun {
                 }
             }
             SunType::SunflowerGeneration => {
-                // 向日葵产生的阳光暂时保持在原地不动
-                // 未来可以添加其他行为，例如轻微浮动或短暂的上升动画
+                // 向日葵产生的阳光只执行一次向上跳跃动画
+                if self.jump_phase < 100.0 {
+                    // 只有在初始阶段才更新jump_phase，达到100后停止更新
+                    self.jump_phase += self.jump_speed * dt as f32;
+                    
+                    // 创建一个类似抛物线的跳跃动画
+                    // 当jump_phase为0时，阳光在初始位置
+                    // 当jump_phase接近50时，阳光达到最高点
+                    // 当jump_phase接近100时，阳光回到原始位置
+                    let progress = self.jump_phase.min(100.0) / 100.0;
+                    
+                    // 使用抛物线函数 y = -4(x-0.5)^2 + 1 来生成跳跃轨迹
+                    // 这会在x=0.5时达到最大值1，在x=0和x=1时为0
+                    let parabola = -4.0 * (progress - 0.5) * (progress - 0.5) + 1.0;
+                    
+                    // 计算当前的跳跃高度
+                    let current_jump_height = parabola * self.jump_height;
+                    
+                    // 更新阳光的y坐标，实现向上跳跃效果
+                    self.y = self.initial_y - current_jump_height;
+                }
+                // 当jump_phase >= 100.0时，不再更新位置，阳光保持在原位
+
             }
         }
 
