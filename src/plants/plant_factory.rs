@@ -22,10 +22,10 @@ pub enum PlantType {
     Sunflower,
     /// 坚果墙：高生命值的防御单位。
     WallNut,
-    // 在这里添加新的植物类型
-    // CherryBomb, // 樱桃炸弹 (示例)
-    // PotatoMine, // 土豆地雷 (示例)
-    // SnowPea,    // 寒冰射手 (示例)
+    // 以后在这里添加新的植物类型
+    // CherryBomb, // 樱桃炸弹 
+    // PotatoMine, // 土豆地雷 
+    // SnowPea,    // 寒冰射手 
 }
 
 impl PlantType {

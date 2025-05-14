@@ -10,9 +10,9 @@ use crate::zombies::zombie_trait::ZombieTrait;
 /// 普通僵尸的初始生命值。
 pub const INITIAL_HEALTH: i32 = 200;
 /// 普通僵尸的移动速度（像素/毫秒）。
-pub const SPEED: f32 = 0.02; 
+pub const SPEED: f32 = 0.017; 
 /// 普通僵尸的攻击伤害值。
-pub const ATTACK_DAMAGE: i32 = 50; 
+pub const ATTACK_DAMAGE: i32 = 300; 
 /// 普通僵尸的攻击间隔（毫秒）。
 pub const ATTACK_INTERVAL: u64 = 1000; // 攻击间隔为1秒
 

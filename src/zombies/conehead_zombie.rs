@@ -16,9 +16,9 @@ const INITIAL_HEALTH: i32 = 370; // 路障僵尸有更多的生命值
 /// 当路障僵尸的生命值低于此值时，其行为和外观将转变为普通僵尸。
 const NORMAL_ZOMBIE_HEALTH: i32 = 200; 
 /// 路障僵尸的移动速度（像素/毫秒）。
-const SPEED: f32 = 0.02; 
+const SPEED: f32 = 0.017; 
 /// 路障僵尸的攻击伤害值。
-const ATTACK_DAMAGE: i32 = 50; 
+const ATTACK_DAMAGE: i32 = 300; 
 /// 路障僵尸的攻击间隔（毫秒）。
 const ATTACK_INTERVAL: u64 = 1000; // 攻击间隔为1秒
 

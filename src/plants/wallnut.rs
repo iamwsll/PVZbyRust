@@ -28,7 +28,7 @@ impl WallNut {
 }
 
 /// 坚果墙的初始生命值。
-const INITIAL_HEALTH: i32 = 4000;
+const INITIAL_HEALTH: i32 = 5000;
 /// 坚果墙的冷却时间（对于坚果墙来说，此值通常不用于主动技能，可能表示再次种植的冷却）。
 const COOLDOWN: u64 = 30000; // 坚果墙冷却时间较长
 /// 种植坚果墙所需的阳光花费。

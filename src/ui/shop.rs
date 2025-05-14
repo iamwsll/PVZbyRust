@@ -24,9 +24,9 @@ pub const CARD_SPACING: f32 = 10.0;
 /// 不同植物类型在商店中的冷却时间（毫秒）。
 /// 顺序应与 `PlantType` 枚举的定义顺序一致。
 const COOLDOWN_TIMES: [u64; 3] = [
-    5000,  // 豌豆射手 (Peashooter)
+    7500,  // 豌豆射手 (Peashooter)
     5000,  // 向日葵 (Sunflower)
-    10000, // 坚果墙 (WallNut)
+    25000, // 坚果墙 (WallNut)
 ];
 
 /// 代表商店中的一张植物卡片。

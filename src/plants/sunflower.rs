@@ -10,27 +10,31 @@ use crate::plants::plant_trait::PlantTrait;
 use crate::core::resources::Resources;
 use ggez::graphics;
 use crate::zombies::Zombie;
+use rand::Rng;
 
 /// 向日葵植物的结构体。
 ///
-/// 目前没有特有状态，其行为完全由 `PlantTrait` 定义。
-pub struct Sunflower;
+/// 包含一个标记字段，用于跟踪是否为第一次产生阳光。
+pub struct Sunflower {
+    /// 是否为首次生产阳光
+    is_first_production: bool,
+}
 
 impl Sunflower {
     /// 创建一个新的 `Sunflower` 实例。
     ///
     /// # Returns
     ///
-    /// 返回一个新的 `Sunflower` 实例。
+    /// 返回一个新的 `Sunflower` 实例，初始化为首次生产状态。
     pub fn new() -> Self {
-        Sunflower
+        Sunflower {
+            is_first_production: true,
+        }
     }
 }
 
 /// 向日葵的初始生命值。
 const INITIAL_HEALTH: i32 = 300;
-/// 向日葵产生阳光的冷却时间（毫秒）。
-const COOLDOWN: u64 = 24000; // 产生阳光间隔为24秒 (原为5000)
 /// 种植向日葵所需的阳光花费。
 const COST: i32 = 50;
 
@@ -41,8 +45,17 @@ impl PlantTrait for Sunflower {
     }
 
     /// 获取向日葵产生阳光的冷却时间。
+    /// 
+    /// 如果是首次生产阳光，返回3到12.5秒的随机值(3000-12500ms)
+    /// 否则返回正常的23.5到25秒的随机值(23500-25000ms)
     fn get_cooldown(&self) -> u64 {
-        COOLDOWN
+        if self.is_first_production {
+            // 首次生产阳光：3到12.5秒的随机值
+            rand::thread_rng().gen_range(3000..=12500)
+        } else {
+            // 之后的正常生产：23.5到25秒的随机值
+            rand::thread_rng().gen_range(23500..=25000)
+        }
     }
 
     /// 获取向日葵动画的总帧数。
@@ -70,6 +83,11 @@ impl PlantTrait for Sunflower {
 
         // 创建新的阳光
         suns.push(Sun::new(sun_x, sun_y, SunType::SunflowerGeneration));
+        
+        // 如果是首次生产，将标记更新为false，表示后续生产将使用正常时间间隔
+        if self.is_first_production {
+            self.is_first_production = false;
+        }
     }
 
     /// 获取种植向日葵所需的阳光花费。
