@@ -149,8 +149,8 @@ impl EventHandler for GameState {
 
             if self.game_over { continue; }
 
-            // 随机生成自然阳光
-            if EntityManager::should_spawn_natural_sun() {
+            // 基于时间生成自然阳光
+            if self.entity_manager.check_natural_sun_spawn(FIXED_UPDATE_DT_MS) {
                 let new_sun = self.entity_manager.spawn_natural_sun();
                 self.suns.push(new_sun);
             }

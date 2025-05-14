@@ -58,7 +58,7 @@ impl Sun {
             x,
             y,
             target_y,
-            speed: 0.1,
+            speed: 0.06,
             lifetime: 0,
             animation_frame: 0,
             animation_timer: 0,
