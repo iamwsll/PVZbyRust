@@ -8,6 +8,7 @@ use crate::entities::sun::Sun;
 use crate::entities::pea::Pea;
 use crate::core::resources::Resources;
 use ggez::graphics;
+use crate::zombies::Zombie; // 确保 Zombie 类型已导入
 
 /// `PlantTrait` 定义了所有植物共享的核心行为和属性。
 ///
@@ -44,7 +45,8 @@ pub trait PlantTrait {
     /// * `grid_y` - 植物所在的网格y坐标。
     /// * `suns` - 一个可变向量的引用，用于收集新产生的阳光。
     /// * `peas` - 一个可变向量的引用，用于收集新发射的豌豆。
-    fn update_action(&mut self, grid_x: usize, grid_y: usize, suns: &mut Vec<Sun>, peas: &mut Vec<Pea>);
+    /// * `zombies` - 一个僵尸向量的引用，用于检查僵尸位置。
+    fn update_action(&mut self, grid_x: usize, grid_y: usize, suns: &mut Vec<Sun>, peas: &mut Vec<Pea>, zombies: &Vec<Zombie>);
     
     /// 获取种植该植物所需的阳光成本。
     ///

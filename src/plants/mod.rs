@@ -17,6 +17,7 @@ use crate::core::resources::Resources;
 use crate::ui::grid::{GRID_START_X, GRID_START_Y, GRID_CELL_HEIGHT, GRID_CELL_WIDTH};
 use crate::entities::sun::Sun;
 use crate::entities::pea::Pea;
+use crate::zombies::Zombie; 
 
 // 声明子模块
 /// 豌豆射手植物的实现。
@@ -30,7 +31,7 @@ pub mod plant_trait;
 /// 植物工厂，用于创建不同类型的植物实例。
 pub mod plant_factory;
 
-// 从工厂模块中重新导出植物类型枚举，方便外部使用。
+// 从工厂模块中重新导出植物类型枚举和工厂本身
 pub use plant_factory::{PlantType, PlantFactory};
 
 /// 通用植物结构体，代表游戏中的一个已种植的植物。
@@ -108,7 +109,8 @@ impl Plant {
     /// * `dt` - 自上次更新以来的时间增量（毫秒）。
     /// * `suns` - 一个可变向量的引用，用于收集由向日葵等植物产生的阳光。
     /// * `peas` - 一个可变向量的引用，用于收集由豌豆射手等植物发射的豌豆。
-    pub fn update(&mut self, dt: u64, suns: &mut Vec<Sun>, peas: &mut Vec<Pea>) {
+    /// * `zombies` - 一个不可变的引用，代表当前场上所有僵尸的状态。
+    pub fn update(&mut self, dt: u64, suns: &mut Vec<Sun>, peas: &mut Vec<Pea>, zombies: &Vec<Zombie>) {
         if self.is_dead {
             return; // 如果植物已经死亡，跳过更新
         }
@@ -132,7 +134,7 @@ impl Plant {
                 self.cooldown_timer = 0; // 重置计时器
 
                 // 调用特定植物的 update_action 方法
-                self.plant_impl.update_action(self.grid_x, self.grid_y, suns, peas);
+                self.plant_impl.update_action(self.grid_x, self.grid_y, suns, peas, zombies);
             }
         }
         

@@ -9,6 +9,7 @@ use crate::entities::pea::{Pea, PeaType};
 use crate::plants::plant_trait::PlantTrait;
 use crate::core::resources::Resources;
 use ggez::graphics;
+use crate::zombies::Zombie; 
 
 /// 豌豆射手植物的结构体。
 ///
@@ -69,19 +70,27 @@ impl PlantTrait for Peashooter {
     /// * `grid_y` - 豌豆射手所在的网格y坐标。
     /// * `_suns` - 阳光列表的引用 (豌豆射手不产生阳光，故未使用)。
     /// * `peas` - 一个可变向量的引用，用于添加新发射的豌豆。
-    fn update_action(&mut self, grid_x: usize, grid_y: usize, _suns: &mut Vec<Sun>, peas: &mut Vec<Pea>) {
-        // 计算豌豆射手的位置，用于确定豌豆的发射位置
-        let x = GRID_START_X + (grid_x as f32) * GRID_CELL_WIDTH + GRID_CELL_WIDTH * 0.8;
-        let y = GRID_START_Y + (grid_y as f32) * GRID_CELL_HEIGHT + GRID_CELL_HEIGHT * 0.3;
-        
-        // 创建一个新豌豆
-        let new_pea = Pea::new(x, y, grid_y, PeaType::Normal);
-        
-        // 添加到豌豆列表中
-        peas.push(new_pea);
-        
-        // 重置发射计时器
-        self.shoot_timer = 0;
+    /// * `zombies` - 一个僵尸向量的引用，用于检查当前行是否有僵尸。
+    fn update_action(&mut self, grid_x: usize, grid_y: usize, _suns: &mut Vec<Sun>, peas: &mut Vec<Pea>, zombies: &Vec<Zombie>) {
+        // 检查当前行是否有僵尸，并且僵尸在豌豆射手的右边
+        let has_zombie_in_row = zombies.iter().any(|zombie| {
+            !zombie.is_dying && zombie.row == grid_y && zombie.x > (GRID_START_X + (grid_x as f32) * GRID_CELL_WIDTH)
+        });
+
+        if has_zombie_in_row {
+            // 计算豌豆射手的位置，用于确定豌豆的发射位置
+            let x = GRID_START_X + (grid_x as f32) * GRID_CELL_WIDTH + GRID_CELL_WIDTH * 0.8;
+            let y = GRID_START_Y + (grid_y as f32) * GRID_CELL_HEIGHT + GRID_CELL_HEIGHT * 0.3;
+            
+            // 创建一个新豌豆
+            let new_pea = Pea::new(x, y, grid_y, PeaType::Normal);
+            
+            // 添加到豌豆列表中
+            peas.push(new_pea);
+            
+            // 重置发射计时器
+            self.shoot_timer = 0;
+        }
     }
     
     /// 获取种植豌豆射手所需的阳光花费。

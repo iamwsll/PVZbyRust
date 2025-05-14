@@ -9,6 +9,7 @@ use crate::entities::pea::Pea;
 use crate::plants::plant_trait::PlantTrait;
 use crate::core::resources::Resources;
 use ggez::graphics;
+use crate::zombies::Zombie;
 
 /// 向日葵植物的结构体。
 ///
@@ -59,9 +60,10 @@ impl PlantTrait for Sunflower {
     ///
     /// * `grid_x` - 向日葵所在的网格x坐标。
     /// * `grid_y` - 向日葵所在的网格y坐标。
-    /// * `suns` - 一个可变向量的引用，用于添加新产生的阳光。
+    /// * `_suns` - 阳光列表的引用 (向日葵不产生阳光，故未使用)。
     /// * `_peas` - 豌豆列表的引用 (向日葵不发射豌豆，故未使用)。
-    fn update_action(&mut self, grid_x: usize, grid_y: usize, suns: &mut Vec<Sun>, _peas: &mut Vec<Pea>) {
+    /// * `_zombies` - 僵尸列表的引用 (向日葵的动作不依赖僵尸状态，故未使用)。
+    fn update_action(&mut self, grid_x: usize, grid_y: usize, suns: &mut Vec<Sun>, _peas: &mut Vec<Pea>, _zombies: &Vec<Zombie>) {
         // 计算阳光生成的位置 (在向日葵上方一点)
         let sun_x = GRID_START_X + (grid_x as f32) * GRID_CELL_WIDTH + GRID_CELL_WIDTH / 2.0;
         let sun_y = GRID_START_Y + (grid_y as f32) * GRID_CELL_HEIGHT; 

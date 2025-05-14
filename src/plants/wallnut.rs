@@ -9,6 +9,7 @@ use crate::entities::pea::Pea;
 use crate::entities::sun::Sun;
 use crate::plants::plant_trait::PlantTrait;
 use ggez::graphics;
+use crate::zombies::Zombie;
 
 /// 坚果墙植物的结构体。
 ///
@@ -64,7 +65,8 @@ impl PlantTrait for WallNut {
     /// * `_grid_y` - 植物所在的网格y坐标 (未使用)。
     /// * `_suns` - 阳光列表的引用 (未使用)。
     /// * `_peas` - 豌豆列表的引用 (未使用)。
-    fn update_action(&mut self, _grid_x: usize, _grid_y: usize, _suns: &mut Vec<Sun>, _peas: &mut Vec<Pea>) {
+    /// * `_zombies` - 僵尸列表的引用 (坚果墙的动作不依赖僵尸状态，故未使用)。
+    fn update_action(&mut self, _grid_x: usize, _grid_y: usize, _suns: &mut Vec<Sun>, _peas: &mut Vec<Pea>, _zombies: &Vec<Zombie>) {
         // 坚果墙没有主动动作
     }
 

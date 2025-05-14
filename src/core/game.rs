@@ -121,7 +121,7 @@ impl EventHandler for GameState {
             // 更新植物并收集新产生的阳光
             let mut new_suns = Vec::new();
             for plant in &mut self.plants {
-                plant.update(FIXED_UPDATE_DT_MS, &mut new_suns, &mut self.peas);
+                plant.update(FIXED_UPDATE_DT_MS, &mut new_suns, &mut self.peas, &self.zombies); // 传递 self.zombies
             }
             self.suns.append(&mut new_suns);
 
