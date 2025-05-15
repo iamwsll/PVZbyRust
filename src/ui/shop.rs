@@ -45,6 +45,8 @@ pub struct PlantCard {
     pub last_used: Option<Instant>,
     /// 卡片的矩形区域，用于碰撞检测（点击）。
     pub rect: Rect,
+    /// 冷却动画显示的进度 (0.0 - 1.0)
+    pub cooldown_display_progress: f32,
 }
 
 impl PlantCard {
@@ -69,6 +71,7 @@ impl PlantCard {
             cooldown: Duration::from_millis(COOLDOWN_TIMES[plant_type as usize]),
             last_used: None,
             rect: Rect::new(x, y, CARD_WIDTH, CARD_HEIGHT),
+            cooldown_display_progress: 1.0, // 初始是完全冷却好的状态
         }
     }
 
@@ -84,13 +87,18 @@ impl PlantCard {
     pub fn update(&mut self, sun_count: i32) {
         // 检查冷却时间
         if let Some(last_used) = self.last_used {
-            if last_used.elapsed() < self.cooldown {
+            let elapsed = last_used.elapsed();
+            if elapsed < self.cooldown {
                 self.available = false;
+                // 更新冷却显示进度
+                self.cooldown_display_progress = elapsed.as_millis() as f32 / self.cooldown.as_millis() as f32;
             } else {
                 self.available = sun_count >= self.plant_type.cost();
+                self.cooldown_display_progress = 1.0; // 完全冷却好了
             }
         } else {
             self.available = sun_count >= self.plant_type.cost();
+            self.cooldown_display_progress = 1.0; // 完全冷却好了
         }
     }
 
@@ -121,21 +129,17 @@ impl PlantCard {
         )?;
         
         // 如果卡片在冷却中，绘制半透明遮罩
-        if let Some(last_used) = self.last_used {
-            let elapsed = last_used.elapsed();
-            if elapsed < self.cooldown {
-                let cooldown_ratio = elapsed.as_millis() as f32 / self.cooldown.as_millis() as f32;
-                let mask_height = CARD_HEIGHT * (1.0 - cooldown_ratio);
-                
-                let rect = graphics::Mesh::new_rectangle(
-                    ctx,
-                    graphics::DrawMode::fill(),
-                    Rect::new(self.position.0, self.position.1, CARD_WIDTH, mask_height),
-                    Color::new(0.0, 0.0, 0.0, 0.5),
-                )?;
-                
-                graphics::draw(ctx, &rect, DrawParam::default())?;
-            }
+        if self.cooldown_display_progress < 1.0 {
+            let mask_height = CARD_HEIGHT * (1.0 - self.cooldown_display_progress);
+            
+            let rect = graphics::Mesh::new_rectangle(
+                ctx,
+                graphics::DrawMode::fill(),
+                Rect::new(self.position.0, self.position.1, CARD_WIDTH, mask_height),
+                Color::new(0.0, 0.0, 0.0, 0.5),
+            )?;
+            
+            graphics::draw(ctx, &rect, DrawParam::default())?;
         }
         
         // 绘制阳光消耗

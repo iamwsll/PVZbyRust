@@ -54,7 +54,9 @@ impl Renderer {
         sun_count: i32,
         game_over: bool,
         victory: bool,
-        show_final_wave: bool
+        show_final_wave: bool,
+        game_state: crate::core::states::GameState,
+        pause_button_rect: (f32, f32, f32, f32)
     ) -> GameResult {
         // 清空屏幕
         graphics::clear(ctx, Color::WHITE);
@@ -87,6 +89,46 @@ impl Renderer {
         
         // 绘制UI元素
         Renderer::draw_ui(ctx, resources, shop, sun_count)?;
+        
+        // 绘制暂停按钮
+        let (x, y, w, h) = pause_button_rect;
+        let button_text = match game_state {
+            crate::core::states::GameState::Paused => "continue",
+            _ => "stop"
+        };
+        
+        // 绘制按钮背景
+        graphics::draw(
+            ctx,
+            &resources.button_image,
+            DrawParam::default()
+                .dest([x, y])
+                .scale([w / resources.button_image.width() as f32, h / resources.button_image.height() as f32])
+        )?;
+        
+        // 绘制按钮文字
+        let button_text = Text::new(
+            TextFragment::new(button_text)
+                .color(Color::BLACK)
+                .scale(20.0)
+        );
+        
+        let text_width = button_text.width(ctx);
+        let text_height = button_text.height(ctx);
+        
+        graphics::draw(
+            ctx,
+            &button_text,
+            DrawParam::default().dest([
+                x + w / 2.0 - text_width / 2.0,
+                y + h / 2.0 - text_height / 2.0,
+            ])
+        )?;
+        
+        // 如果游戏暂停，显示暂停信息
+        if game_state == crate::core::states::GameState::Paused {
+            Renderer::draw_pause_message(ctx)?;
+        }
         
         // 如果显示最后一波信息
         if show_final_wave {
@@ -258,6 +300,40 @@ impl Renderer {
         graphics::draw(
             ctx,
             &victory_text,
+            DrawParam::default().dest([
+                screen_size.0 / 2.0 - text_width / 2.0,
+                screen_size.1 / 2.0 - text_height / 2.0,
+            ])
+        )?;
+        
+        Ok(())
+    }
+    
+    /// 绘制游戏暂停信息。
+    ///
+    /// 当游戏处于暂停状态时，在屏幕中央显示 "Game Stop" 文本。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，表示绘制操作是否成功。
+    fn draw_pause_message(ctx: &mut Context) -> GameResult {
+        let pause_text = Text::new(
+            TextFragment::new("Game Stop")
+                .color(Color::BLUE)
+                .scale(80.0)
+        );
+        
+        let text_width = pause_text.width(ctx);
+        let text_height = pause_text.height(ctx);
+        let screen_size = graphics::drawable_size(ctx);
+        
+        graphics::draw(
+            ctx,
+            &pause_text,
             DrawParam::default().dest([
                 screen_size.0 / 2.0 - text_width / 2.0,
                 screen_size.1 / 2.0 - text_height / 2.0,

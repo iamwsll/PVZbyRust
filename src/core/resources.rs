@@ -17,6 +17,8 @@ pub struct Resources {
     pub background: Image,
     /// 商店界面的背景图片。
     pub shop_image: Image,
+    /// 暂停按钮图片。
+    pub button_image: Image,
     /// 太阳的动画帧序列。
     pub sun_images: Vec<Image>,
 
@@ -111,6 +113,7 @@ impl Resources {
         // Load background and UI
         let background = Image::new(ctx, "/other_image/Background.png")?;
         let shop_image = Image::new(ctx, "/other_image/Shop.png")?;
+        let button_image = Image::new(ctx, "/other_image/Button.png")?;
 
         // 加载太阳动画帧
         let sun_images = load_animation_frames(ctx, "/other_image/sun/Sun{}.png", 0..=21, "Sun")?;
@@ -147,6 +150,7 @@ impl Resources {
         Ok(Resources {
             background,
             shop_image,
+            button_image,
             sun_images,
             peashooter_images,
             sunflower_images,

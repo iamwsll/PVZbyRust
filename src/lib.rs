@@ -13,6 +13,7 @@ pub mod zombies;
 
 
 /// 一个示例函数，表明库已正确加载。
+/// 该函数无用。库调用的正确方式请见main.rs。
 pub fn library_greeting() {
     println!("Hello from the pvz_rust_wsll library!");
 }

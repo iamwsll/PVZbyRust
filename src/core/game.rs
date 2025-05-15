@@ -58,6 +58,13 @@ pub struct GameState {
     shop: Shop,
     /// 实体管理器，负责生成新的实体，如自然掉落的阳光和来袭的僵尸。
     entity_manager: EntityManager,
+    
+    /// 游戏当前的状态（运行中、暂停等）
+    game_state: crate::core::states::GameState,
+    /// 暂停按钮的位置和尺寸
+    pause_button_rect: (f32, f32, f32, f32),
+    /// 游戏暂停的时间点
+    pause_start_time: Option<std::time::Instant>,
 }
 
 impl GameState {
@@ -91,6 +98,9 @@ impl GameState {
             final_wave_message_time: None,
             shop,
             entity_manager,
+            game_state: crate::core::states::GameState::InGame,
+            pause_button_rect: (750.0, 10.0, 80.0, 40.0), // x, y, width, height
+            pause_start_time: None,
         })
     }
 }
@@ -119,7 +129,7 @@ impl EventHandler for GameState {
         // ggez::timer::check_update_time 会根据自上次 EventHandler::update 调用以来的时间
         // 来决定逻辑更新循环（while 循环体）需要执行多少次，以达到 DESIRED_FPS。
         while ggez::timer::check_update_time(ctx, DESIRED_FPS) {
-            if self.game_over {
+            if self.game_over || self.game_state == crate::core::states::GameState::Paused {
                 continue;
             }
             
@@ -190,8 +200,10 @@ impl EventHandler for GameState {
                 self.victory = true;
             }
             
-            // 更新商店
-            self.shop.update(self.sun_count);
+            // 更新商店（只有在游戏未暂停时才更新）
+            if self.game_state != crate::core::states::GameState::Paused {
+                self.shop.update(self.sun_count);
+            }
         }
 
         Ok(())
@@ -222,7 +234,9 @@ impl EventHandler for GameState {
             self.sun_count,
             self.game_over,
             self.victory,
-            self.show_final_wave
+            self.show_final_wave,
+            self.game_state,
+            self.pause_button_rect
         )
     }
 
@@ -238,6 +252,59 @@ impl EventHandler for GameState {
     /// * `x` - 鼠标点击位置的x坐标。
     /// * `y` - 鼠标点击位置的y坐标。
     fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
+        // 检查是否点击了暂停按钮
+        let (btn_x, btn_y, btn_w, btn_h) = self.pause_button_rect;
+        if button == MouseButton::Left 
+           && x >= btn_x && x <= btn_x + btn_w 
+           && y >= btn_y && y <= btn_y + btn_h {
+            // 切换游戏状态
+            match self.game_state {
+                crate::core::states::GameState::Paused => {
+                    // 游戏从暂停恢复正常状态
+                    self.game_state = crate::core::states::GameState::InGame;
+                    
+                    // 计算暂停持续了多长时间
+                    if let Some(pause_time) = self.pause_start_time {
+                        let pause_duration = pause_time.elapsed();
+                        
+                        // 调整所有卡片的冷却时间
+                        for card in &mut self.shop.cards {
+                            if let Some(last_used) = card.last_used {
+                                // 将卡片的最后使用时间向后推迟暂停持续的时间
+                                card.last_used = Some(std::time::Instant::now()
+                                    .checked_sub(last_used.elapsed().checked_sub(pause_duration)
+                                        .unwrap_or_else(|| std::time::Duration::from_secs(0)))
+                                    .unwrap_or_else(std::time::Instant::now));
+                                
+                                // 恢复暂停前的状态后，立即更新一次冷却显示进度
+                                let elapsed = card.last_used.unwrap().elapsed();
+                                if elapsed < card.cooldown {
+                                    card.cooldown_display_progress = elapsed.as_millis() as f32 / card.cooldown.as_millis() as f32;
+                                } else {
+                                    card.cooldown_display_progress = 1.0;
+                                }
+                            }
+                        }
+                        
+                        self.pause_start_time = None;
+                    }
+                },
+                _ => {
+                    // 游戏进入暂停状态
+                    self.game_state = crate::core::states::GameState::Paused;
+                    self.pause_start_time = Some(std::time::Instant::now());
+                    
+                    // 在暂停时，冷却显示进度已经在update方法中正确设置，此处不需要额外处理
+                }
+            }
+            return;
+        }
+        
+        // 如果游戏暂停，不处理其他输入
+        if self.game_state == crate::core::states::GameState::Paused {
+            return;
+        }
+        
         InputHandler::handle_mouse_down(
             button, 
             x, 
