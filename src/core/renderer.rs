@@ -52,7 +52,9 @@ impl Renderer {
         suns: &[Sun],
         shop: &Shop,
         sun_count: i32,
-        game_over: bool
+        game_over: bool,
+        victory: bool,
+        show_final_wave: bool
     ) -> GameResult {
         // 清空屏幕
         graphics::clear(ctx, Color::WHITE);
@@ -86,9 +88,19 @@ impl Renderer {
         // 绘制UI元素
         Renderer::draw_ui(ctx, resources, shop, sun_count)?;
         
+        // 如果显示最后一波信息
+        if show_final_wave {
+            Renderer::draw_final_wave_message(ctx)?;
+        }
+        
         // 如果游戏结束，显示结束画面
         if game_over {
             Renderer::draw_game_over(ctx)?;
+        }
+        
+        // 如果游戏胜利，显示胜利画面
+        if victory {
+            Renderer::draw_victory_message(ctx)?;
         }
         
         // 呈现画面
@@ -147,7 +159,7 @@ impl Renderer {
         graphics::draw(
             ctx,
             &sun_text,
-            DrawParam::default().dest([285.0, 65.0])
+            DrawParam::default().dest([280.0, 65.0])
         )?;
         
         Ok(())
@@ -178,6 +190,74 @@ impl Renderer {
         graphics::draw(
             ctx,
             &game_over_text,
+            DrawParam::default().dest([
+                screen_size.0 / 2.0 - text_width / 2.0,
+                screen_size.1 / 2.0 - text_height / 2.0,
+            ])
+        )?;
+        
+        Ok(())
+    }
+    
+    /// 绘制最后一波来袭消息。
+    ///
+    /// 当最后一波僵尸出现时，在屏幕中央显示 "最后一波来袭!" 文本。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，表示绘制操作是否成功。
+    fn draw_final_wave_message(ctx: &mut Context) -> GameResult {
+        let final_wave_text = Text::new(
+            TextFragment::new("The final wave is coming!")
+                .color(Color::RED)
+                .scale(70.0)
+        );
+        
+        let text_width = final_wave_text.width(ctx);
+        let text_height = final_wave_text.height(ctx);
+        let screen_size = graphics::drawable_size(ctx);
+        
+        graphics::draw(
+            ctx,
+            &final_wave_text,
+            DrawParam::default().dest([
+                screen_size.0 / 2.0 - text_width / 2.0,
+                screen_size.1 / 2.0 - text_height / 2.0,
+            ])
+        )?;
+        
+        Ok(())
+    }
+    
+    /// 绘制游戏胜利画面。
+    ///
+    /// 当玩家成功击败所有僵尸后，在屏幕中央显示 "游戏胜利!" 文本。
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - ggez的上下文环境。
+    ///
+    /// # Returns
+    ///
+    /// 返回一个 `GameResult`，表示绘制操作是否成功。
+    fn draw_victory_message(ctx: &mut Context) -> GameResult {
+        let victory_text = Text::new(
+            TextFragment::new("you win!")
+                .color(Color::GREEN)
+                .scale(100.0)
+        );
+        
+        let text_width = victory_text.width(ctx);
+        let text_height = victory_text.height(ctx);
+        let screen_size = graphics::drawable_size(ctx);
+        
+        graphics::draw(
+            ctx,
+            &victory_text,
             DrawParam::default().dest([
                 screen_size.0 / 2.0 - text_width / 2.0,
                 screen_size.1 / 2.0 - text_height / 2.0,

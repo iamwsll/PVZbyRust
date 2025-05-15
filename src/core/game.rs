@@ -19,6 +19,7 @@ use crate::core::renderer::Renderer;
 use ggez::event::EventHandler;
 use ggez::input::mouse::MouseButton;
 use ggez::{Context, GameResult};
+use std::time::Instant;
 
 /// 游戏状态结构体，封装了游戏世界中的所有动态数据和状态。
 ///
@@ -44,8 +45,14 @@ pub struct GameState {
     sun_count: i32,
     /// 玩家当前从商店选中的待放置植物类型。
     selected_plant: Option<PlantType>,
-    /// 标记游戏是否已经结束。
+    /// 标记游戏是否已经结束（游戏失败）。
     game_over: bool,
+    /// 标记游戏是否胜利。
+    victory: bool,
+    /// 标记是否显示"最后一波来袭"消息。
+    show_final_wave: bool,
+    /// 显示最后一波消息的时间。
+    final_wave_message_time: Option<Instant>,
     
     /// 游戏商店，用于购买植物。
     shop: Shop,
@@ -79,6 +86,9 @@ impl GameState {
             sun_count: 50,
             selected_plant: None,
             game_over: false,
+            victory: false,
+            show_final_wave: false,
+            final_wave_message_time: None,
             shop,
             entity_manager,
         })
@@ -155,14 +165,31 @@ impl EventHandler for GameState {
                 self.suns.push(new_sun);
             }
 
-            // 通过关卡控制器更新并生成僵尸
-            // 假设 entity_manager.update 也期望一个逻辑步长时间
-            let zombie_spawns = self.entity_manager.update(FIXED_UPDATE_DT_MS);
+            // 通过关卡控制器更新并生成僵尸，传递当前场上的僵尸信息
+            let zombie_spawns = self.entity_manager.update(FIXED_UPDATE_DT_MS, &self.zombies);
             for spawn_info in zombie_spawns {
                 let zombie = self.entity_manager.spawn_zombie(spawn_info.zombie_type, spawn_info.row);
                 self.zombies.push(zombie);
             }
-
+            
+            // 检查是否应该显示最后一波信息
+            if self.entity_manager.level_controller.is_final_wave_announced() {
+                self.show_final_wave = true;
+                self.final_wave_message_time = Some(Instant::now());
+            }
+            
+            // 如果已经显示"最后一波来袭"信息5秒钟，则隐藏它
+            if let Some(time) = self.final_wave_message_time {
+                if time.elapsed().as_secs() > 5 {
+                    self.show_final_wave = false;
+                }
+            }
+            
+            // 检查关卡是否胜利完成
+            if self.entity_manager.level_controller.is_level_completed(&self.zombies) {
+                self.victory = true;
+            }
+            
             // 更新商店
             self.shop.update(self.sun_count);
         }
@@ -193,7 +220,9 @@ impl EventHandler for GameState {
             &self.suns,
             &self.shop,
             self.sun_count,
-            self.game_over
+            self.game_over,
+            self.victory,
+            self.show_final_wave
         )
     }
 

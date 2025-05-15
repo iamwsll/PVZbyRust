@@ -12,7 +12,7 @@ pub const INITIAL_HEALTH: i32 = 200;
 /// 普通僵尸的移动速度（像素/毫秒）。
 pub const SPEED: f32 = 0.017; 
 /// 普通僵尸的攻击伤害值。
-pub const ATTACK_DAMAGE: i32 = 300; 
+pub const ATTACK_DAMAGE: i32 = 100; 
 /// 普通僵尸的攻击间隔（毫秒）。
 pub const ATTACK_INTERVAL: u64 = 1000; // 攻击间隔为1秒
 

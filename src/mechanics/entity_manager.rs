@@ -50,14 +50,15 @@ impl EntityManager {
     /// # Arguments
     ///
     /// * `dt` - 自上次更新以来的时间增量（毫秒），传递给 `LevelController`。
+    /// * `zombies` - 当前场上所有僵尸的引用切片，用于判断是否可以生成下一波。
     ///
     /// # Returns
     ///
     /// 返回一个包含 `ZombieSpawnInfo` 的向量，指示需要生成的僵尸类型和行号。
     /// 注意：自然阳光的生成需要通过调用 `check_natural_sun_spawn` 方法来检查。
-    pub fn update(&mut self, dt: u64) -> Vec<ZombieSpawnInfo> {
+    pub fn update(&mut self, dt: u64, zombies: &[Zombie]) -> Vec<ZombieSpawnInfo> {
         // 更新关卡控制器获取僵尸生成信息
-        self.level_controller.update(dt)
+        self.level_controller.update(dt, zombies)
     }
     
     /// 检查并更新自然阳光生成倒计时。

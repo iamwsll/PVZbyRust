@@ -18,7 +18,7 @@ const NORMAL_ZOMBIE_HEALTH: i32 = 200;
 /// 路障僵尸的移动速度（像素/毫秒）。
 const SPEED: f32 = 0.017; 
 /// 路障僵尸的攻击伤害值。
-const ATTACK_DAMAGE: i32 = 300; 
+const ATTACK_DAMAGE: i32 = 100; 
 /// 路障僵尸的攻击间隔（毫秒）。
 const ATTACK_INTERVAL: u64 = 1000; // 攻击间隔为1秒
 

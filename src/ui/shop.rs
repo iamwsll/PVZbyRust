@@ -263,6 +263,27 @@ impl Shop {
         Ok(())
     }
     
+    /// 触发指定植物类型卡片的冷却计时。
+    ///
+    /// 当植物成功放置到网格上后，应调用此方法以启动相应卡片的冷却计时。
+    ///
+    /// # Arguments
+    ///
+    /// * `plant_type` - 要触发冷却的植物类型。
+    ///
+    /// # Returns
+    ///
+    /// 如果成功找到并触发了卡片的冷却，则返回 `true`，否则返回 `false`。
+    pub fn trigger_card_cooldown(&mut self, plant_type: PlantType) -> bool {
+        for card in &mut self.cards {
+            if card.plant_type == plant_type {
+                card.use_card();
+                return true;
+            }
+        }
+        false
+    }
+    
     /// 处理在商店区域的鼠标点击事件。
     ///
     /// 如果当前没有选中的植物，此方法会检查点击是否落在某个可用的植物卡片上。
@@ -294,7 +315,7 @@ impl Shop {
                 let plant_type = card.plant_type;
                 if sun_count >= plant_type.cost() {
                     self.selected_plant = Some(plant_type);
-                    card.use_card();
+                    // 移除 card.use_card() 调用，不再在选择时触发冷却
                     return Some(plant_type);
                 }
             }

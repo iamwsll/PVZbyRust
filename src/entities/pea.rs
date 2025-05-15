@@ -80,7 +80,7 @@ impl Pea {
         self.x += self.speed * dt as f32;
         
         // 如果豌豆飞出屏幕，将其设置为非活动状态
-        if self.x > 900.0 {
+        if self.x > 1000.0 {
             self.active = false;
         }
     }

@@ -84,7 +84,7 @@ impl InputHandler {
             if selected_plant.is_some() {
                 if x >= GRID_START_X && x <= GRID_START_X + GRID_CELL_WIDTH * GRID_WIDTH as f32 &&
                    y >= GRID_START_Y && y <= GRID_START_Y + GRID_CELL_HEIGHT * GRID_HEIGHT as f32 {
-                   if Self::place_plant(x, y, grid, plants, selected_plant, sun_count) {
+                   if Self::place_plant(x, y, grid, plants, selected_plant, sun_count, shop) {
                        // 放置成功，清除选择状态
                        shop.selected_plant = None;
                        return true;
@@ -137,7 +137,8 @@ impl InputHandler {
         grid: &mut Grid,
         plants: &mut Vec<Plant>,
         selected_plant: &mut Option<PlantType>,
-        sun_count: &mut i32
+        sun_count: &mut i32,
+        shop: &mut Shop
     ) -> bool {
         if let Some(plant_type) = selected_plant {
             if let Some((grid_x, grid_y)) = grid.get_grid_position(x, y) {
@@ -147,6 +148,9 @@ impl InputHandler {
                     plants.push(plant);
                     *sun_count -= plant_type.cost();
                     grid.occupy(grid_x, grid_y);
+
+                    // 在植物成功放置后，才触发卡片冷却
+                    shop.trigger_card_cooldown(*plant_type);
 
                     // 放置植物后取消选择状态
                     *selected_plant = None;
