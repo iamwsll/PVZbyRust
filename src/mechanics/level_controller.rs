@@ -49,7 +49,7 @@ impl LevelController {
     /// 创建一个新的 `LevelController` 实例。
     ///
     /// 初始化时，设置关卡开始时间为当前时间，并配置波次和生成规律。
-    /// 第一波僵尸将在关卡开始后15秒出现。
+    /// 第一波僵尸将在关卡开始后18秒出现。
     ///
     /// # Returns
     ///
@@ -119,7 +119,7 @@ impl LevelController {
     /// 更新关卡控制器的状态，并决定是否需要生成新的僵尸。
     ///
     /// 实现了完整的波次管理逻辑：
-    /// 1. 游戏开始后15秒开始第一波
+    /// 1. 游戏开始后18秒开始第一波
     /// 2. 每波内生成指定数量的僵尸
     /// 3. 波次之间有休息时间
     /// 4. 难度随波次递增
@@ -142,12 +142,12 @@ impl LevelController {
             return spawns;
         }
         
-        // 等待游戏开始后15秒再生成第一波
+        // 等待游戏开始后18秒再生成第一波
         if self.waiting_for_first_wave {
-            if now.duration_since(self.start_time) < Duration::from_secs(15) {
+            if now.duration_since(self.start_time) < Duration::from_secs(18) {
                 return spawns; // 继续等待
             }
-            // 15秒后开始第一波
+            // 18秒后开始第一波
             self.waiting_for_first_wave = false;
             self.last_spawn_time = now; // 立即开始生成第一只僵尸
         }
@@ -179,8 +179,8 @@ impl LevelController {
             } 
             // 如果当前波次中的僵尸已经全部生成完毕，并且场上没有存活的僵尸，考虑进入下一波
             else if self.is_wave_cleared(zombies) {
-                // 波次间隔为15秒
-                if now.duration_since(self.last_spawn_time) >= Duration::from_secs(15) {
+                // 波次间隔为6秒
+                if now.duration_since(self.last_spawn_time) >= Duration::from_secs(6) {
                     // 进入下一波
                     self.current_wave += 1;
                     

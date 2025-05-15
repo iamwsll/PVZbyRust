@@ -94,7 +94,7 @@ impl Renderer {
         let (x, y, w, h) = pause_button_rect;
         let button_text = match game_state {
             crate::core::states::GameState::Paused => "continue",
-            _ => "stop"
+            _ => "pause"
         };
         
         // 绘制按钮背景
@@ -311,7 +311,7 @@ impl Renderer {
     
     /// 绘制游戏暂停信息。
     ///
-    /// 当游戏处于暂停状态时，在屏幕中央显示 "Game Stop" 文本。
+    /// 当游戏处于暂停状态时，在屏幕中央显示 "Game Paused" 文本。
     ///
     /// # Arguments
     ///
@@ -322,7 +322,7 @@ impl Renderer {
     /// 返回一个 `GameResult`，表示绘制操作是否成功。
     fn draw_pause_message(ctx: &mut Context) -> GameResult {
         let pause_text = Text::new(
-            TextFragment::new("Game Stop")
+            TextFragment::new("Game Paused")
                 .color(Color::BLUE)
                 .scale(80.0)
         );
