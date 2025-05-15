@@ -319,7 +319,6 @@ impl Shop {
                 let plant_type = card.plant_type;
                 if sun_count >= plant_type.cost() {
                     self.selected_plant = Some(plant_type);
-                    // 移除 card.use_card() 调用，不再在选择时触发冷却
                     return Some(plant_type);
                 }
             }

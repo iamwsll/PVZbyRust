@@ -99,7 +99,7 @@ impl GameState {
             shop,
             entity_manager,
             game_state: crate::core::states::GameState::InGame,
-            pause_button_rect: (750.0, 10.0, 80.0, 40.0), // x, y, width, height
+            pause_button_rect: (950.0, 10.0, 80.0, 40.0), // x, y, width, height
             pause_start_time: None,
         })
     }
