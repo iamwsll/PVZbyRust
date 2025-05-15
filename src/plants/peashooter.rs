@@ -74,7 +74,7 @@ impl PlantTrait for Peashooter {
     fn update_action(&mut self, grid_x: usize, grid_y: usize, _suns: &mut Vec<Sun>, peas: &mut Vec<Pea>, zombies: &Vec<Zombie>) {
         // 检查当前行是否有僵尸，并且僵尸在豌豆射手的右边
         let has_zombie_in_row = zombies.iter().any(|zombie| {
-            !zombie.is_dying && zombie.row == grid_y && zombie.x > (GRID_START_X + (grid_x as f32) * GRID_CELL_WIDTH)
+            !zombie.is_dying && zombie.row == grid_y && zombie.x > (GRID_START_X + ((grid_x as f32) * GRID_CELL_WIDTH/2.0))
         });
 
         if has_zombie_in_row {
