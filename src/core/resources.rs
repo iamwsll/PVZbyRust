@@ -21,6 +21,10 @@ pub struct Resources {
     pub button_image: Image,
     /// 太阳的动画帧序列。
     pub sun_images: Vec<Image>,
+    /// 铲子图片。
+    pub shovel_image: Image,
+    /// 铲子框图片。
+    pub shovel_bank_image: Image,
 
     // 植物相关图像
     /// 豌豆射手的动画帧序列。
@@ -146,12 +150,17 @@ impl Resources {
         let pea_image = Image::new(ctx, "/plants/Pea.png")?;
         // let pea_snow_image = Image::new(ctx, "/plants/PeaSnow.png")?;
 
+        // 加载铲子相关图像
+        let shovel_image = Image::new(ctx, "/other_image/Shovel.png")?;
+        let shovel_bank_image = Image::new(ctx, "/other_image/ShovelBank.png")?;
 
         Ok(Resources {
             background,
             shop_image,
             button_image,
             sun_images,
+            shovel_image,
+            shovel_bank_image,
             peashooter_images,
             sunflower_images,
             wallnut_images,

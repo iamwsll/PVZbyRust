@@ -10,6 +10,7 @@ use crate::entities::sun::Sun;
 use crate::zombies::Zombie;
 use crate::entities::pea::Pea;
 use crate::ui::shop::Shop;
+use crate::ui::shovel::Shovel;
 use crate::plants::Plant;
 use crate::mechanics::collision::CollisionManager;
 use crate::mechanics::entity_manager::EntityManager;
@@ -56,6 +57,8 @@ pub struct GameState {
     
     /// 游戏商店，用于购买植物。
     shop: Shop,
+    /// 铲子，用于铲除种植的植物。
+    shovel: Shovel,
     /// 实体管理器，负责生成新的实体，如自然掉落的阳光和来袭的僵尸。
     entity_manager: EntityManager,
     
@@ -81,6 +84,7 @@ impl GameState {
         let resources = Resources::new(ctx)?;
         let grid = Grid::new();
         let shop = Shop::new();
+        let shovel = Shovel::new();
         let entity_manager = EntityManager::new();
 
         Ok(GameState {
@@ -97,6 +101,7 @@ impl GameState {
             show_final_wave: false,
             final_wave_message_time: None,
             shop,
+            shovel,
             entity_manager,
             game_state: crate::core::states::GameState::InGame,
             pause_button_rect: (950.0, 10.0, 80.0, 40.0), // x, y, width, height
@@ -106,6 +111,53 @@ impl GameState {
 }
 
 impl EventHandler for GameState {
+    /// 处理鼠标移动事件。
+    ///
+    /// 当玩家移动鼠标时，此方法被调用。它主要用于更新铲子的位置（如果铲子正在被拖动）。
+    ///
+    /// # Arguments
+    ///
+    /// * `_ctx` - ggez的上下文环境 (在此方法中未使用)。
+    /// * `x` - 鼠标当前位置的x坐标。
+    /// * `y` - 鼠标当前位置的y坐标。
+    /// * `_dx` - 鼠标在x方向上的移动量 (在此方法中未使用)。
+    /// * `_dy` - 鼠标在y方向上的移动量 (在此方法中未使用)。
+    fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y: f32, _dx: f32, _dy: f32) {
+        // 如果铲子正在拖动中，更新其位置
+        if self.shovel.is_dragging {
+            self.shovel.update_position(x, y);
+        }
+    }
+    
+    /// 处理鼠标释放事件。
+    ///
+    /// 当玩家释放鼠标按键时，此方法被调用。它主要用于处理铲子的释放操作。
+    ///
+    /// # Arguments
+    ///
+    /// * `_ctx` - ggez的上下文环境 (在此方法中未使用)。
+    /// * `button` - 被释放的鼠标按键。
+    /// * `x` - 鼠标释放位置的x坐标。
+    /// * `y` - 鼠标释放位置的y坐标。
+    fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
+        // 只处理游戏进行中的情况
+        if self.game_state != crate::core::states::GameState::InGame || self.game_over {
+            return;
+        }
+        
+        if button == MouseButton::Left {
+            // 如果铲子正在拖动中，尝试铲除植物
+            if self.shovel.is_dragging {
+                if self.shovel.dig(x, y, &mut self.grid, &mut self.plants) {
+                    // 铲除成功，重置铲子状态
+                    self.shovel.reset();
+                } else {
+                    // 铲除失败，重置铲子状态
+                    self.shovel.reset();
+                }
+            }
+        }
+    }
     /// 更新游戏状态，此方法会在每一帧被调用。
     ///
     /// 负责处理游戏逻辑的更新，包括实体（植物、僵尸、豌豆、阳光）的状态更新、
@@ -236,7 +288,8 @@ impl EventHandler for GameState {
             self.victory,
             self.show_final_wave,
             self.game_state,
-            self.pause_button_rect
+            self.pause_button_rect,
+            &self.shovel
         )
     }
 
@@ -315,7 +368,8 @@ impl EventHandler for GameState {
             &mut self.plants,
             &mut self.selected_plant,
             &mut self.sun_count,
-            self.game_over
+            self.game_over,
+            &mut self.shovel
         );
     }
 }

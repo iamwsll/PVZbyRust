@@ -6,6 +6,7 @@
 use crate::ui::grid::{Grid, GRID_START_X, GRID_START_Y, GRID_CELL_HEIGHT, GRID_CELL_WIDTH, GRID_WIDTH, GRID_HEIGHT};
 use crate::plants::{Plant, PlantType};
 use crate::ui::shop::{Shop, SHOP_START_Y, CARD_HEIGHT};
+use crate::ui::shovel::Shovel;
 use crate::entities::sun::Sun;
 use ggez::input::mouse::MouseButton;
 
@@ -51,13 +52,33 @@ impl InputHandler {
         plants: &mut Vec<Plant>,
         selected_plant: &mut Option<PlantType>,
         sun_count: &mut i32,
-        game_over: bool
+        game_over: bool,
+        shovel: &mut Shovel
     ) -> bool {
         if game_over {
             return false;
         }
 
         if button == MouseButton::Left {
+            // 检查是否点击了铲子
+            if shovel.is_clicked(x, y) {
+                shovel.is_dragging = true;
+                // 取消选中植物
+                *selected_plant = None;
+                shop.selected_plant = None;
+                return true;
+            }
+            
+            // 如果铲子正在拖动中，检查是否可以铲除植物
+            if shovel.is_dragging {
+                if shovel.dig(x, y, grid, plants) {
+                    // 铲除成功，重置铲子状态
+                    shovel.reset();
+                    return true;
+                }
+                return false; // 点击在网格外或没有植物，铲子动作不生效
+            }
+            
             // 检查是否点击了阳光
             let initial_sun_count = *sun_count;
             suns.retain(|sun| {

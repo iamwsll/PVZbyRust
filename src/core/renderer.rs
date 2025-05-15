@@ -10,6 +10,7 @@ use crate::entities::pea::Pea;
 use crate::zombies::Zombie;
 use crate::entities::sun::Sun;
 use crate::ui::shop::Shop;
+use crate::ui::shovel::Shovel;
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, Color, DrawParam, Text, TextFragment};
 
@@ -56,7 +57,8 @@ impl Renderer {
         victory: bool,
         show_final_wave: bool,
         game_state: crate::core::states::GameState,
-        pause_button_rect: (f32, f32, f32, f32)
+        pause_button_rect: (f32, f32, f32, f32),
+        shovel: &Shovel
     ) -> GameResult {
         // 清空屏幕
         graphics::clear(ctx, Color::WHITE);
@@ -89,6 +91,9 @@ impl Renderer {
         
         // 绘制UI元素
         Renderer::draw_ui(ctx, resources, shop, sun_count)?;
+        
+        // 绘制铲子
+        shovel.draw(ctx, resources)?;
         
         // 绘制暂停按钮
         let (x, y, w, h) = pause_button_rect;

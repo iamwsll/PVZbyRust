@@ -107,6 +107,19 @@ impl Grid {
     pub fn occupy(&mut self, x: usize, y: usize) {
         self.occupied[y][x] = true;
     }
+    
+    /// 将指定的网格单元格标记为未占据。
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - 网格的列索引。
+    /// * `y` - 网格的行索引。
+    ///
+    /// **注意**: 此方法假设 `x` 和 `y` 是有效的网格索引，不进行边界检查。
+    /// 调用者应确保索引在 `0..GRID_WIDTH` 和 `0..GRID_HEIGHT` 范围内。
+    pub fn unoccupy(&mut self, x: usize, y: usize) {
+        self.occupied[y][x] = false;
+    }
 
     /// 在屏幕上绘制网格线。
     ///
