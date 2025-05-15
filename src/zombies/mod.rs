@@ -41,8 +41,6 @@ pub struct Zombie {
     pub x: f32,
     /// 僵尸当前的生命值。
     health: i32,
-    /// 僵尸的最大生命值，主要用于特殊僵尸（如路障僵尸）在失去护甲后重置生命值。
-    max_health: i32, 
     /// 僵尸的移动速度（像素/毫秒）。
     speed: f32,
     /// 当前动画帧的索引。
@@ -108,7 +106,6 @@ impl Zombie {
             row,
             x: 950.0, // 从屏幕右侧开始，确保完全在屏幕外生成
             health,
-            max_health: health, // 初始时最大生命值等于当前生命值
             speed,
             animation_frame: 0,
             animation_timer: 0,

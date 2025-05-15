@@ -46,8 +46,6 @@ pub struct Plant {
     pub grid_y: usize,
     /// 植物当前的生命值。
     pub health: i32,
-    /// 植物的最大生命值，用于计算损坏状态或UI显示。
-    max_health: i32,
     /// 当前显示的动画帧索引。
     animation_frame: usize,
     /// 动画帧切换的计时器。
@@ -86,7 +84,6 @@ impl Plant {
             grid_x,
             grid_y,
             health,
-            max_health: health, // 初始时最大生命值等于当前生命值
             animation_frame: 0,
             animation_timer: 0,
             cooldown_timer: 0,

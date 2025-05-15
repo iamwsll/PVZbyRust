@@ -4,7 +4,6 @@
 //! 用于根据指定的植物类型创建相应的植物实例 (`Box<dyn PlantTrait>`)。
 //! 这种工厂模式使得在游戏逻辑中创建不同植物更加方便和类型安全。
 
-use std::rc::Rc;
 use crate::plants::plant_trait::PlantTrait;
 use crate::plants::peashooter::Peashooter;
 use crate::plants::sunflower::Sunflower;
