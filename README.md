@@ -2,6 +2,8 @@
 
 用Rust语言实现的植物大战僵尸游戏
 
+# WARNING：请务必在试玩前把电脑屏幕缩放率调成100%，否则会出现重大bug
+
 [English](README_EN.md) | 简体中文
 
 ## 项目简介
@@ -42,6 +44,7 @@ cd PVZbyRust
 ```
 
 2. 编译和运行游戏：
+# WARNING：请务必在试玩前把电脑屏幕缩放率调成100%，否则会出现重大bug
 ```bash
 cargo run --release
 ```
