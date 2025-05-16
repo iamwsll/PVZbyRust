@@ -58,7 +58,8 @@ impl Renderer {
         show_final_wave: bool,
         game_state: crate::core::states::GameState,
         pause_button_rect: (f32, f32, f32, f32),
-        shovel: &Shovel
+        shovel: &Shovel,
+        is_initial_pause: bool
     ) -> GameResult {
         // 清空屏幕
         graphics::clear(ctx, Color::WHITE);
@@ -98,7 +99,7 @@ impl Renderer {
         // 绘制暂停按钮
         let (x, y, w, h) = pause_button_rect;
         let button_text = match game_state {
-            crate::core::states::GameState::Paused => "continue",
+            crate::core::states::GameState::Paused => if is_initial_pause { "Start" } else { "Continue" },
             _ => "pause"
         };
         
@@ -132,7 +133,7 @@ impl Renderer {
         
         // 如果游戏暂停，显示暂停信息
         if game_state == crate::core::states::GameState::Paused {
-            Renderer::draw_pause_message(ctx)?;
+            Renderer::draw_pause_message(ctx, is_initial_pause)?;
         }
         
         // 如果显示最后一波信息
@@ -316,21 +317,32 @@ impl Renderer {
     
     /// 绘制游戏暂停信息。
     ///
-    /// 当游戏处于暂停状态时，在屏幕中央显示 "Game Paused" 文本。
+    /// 当游戏处于暂停状态时，在屏幕中央显示暂停文本。
+    /// 初始暂停时显示"请确保屏幕缩放比例为100%\n点击右上角开始"
+    /// 普通暂停时显示"Game Paused"
     ///
     /// # Arguments
     ///
     /// * `ctx` - ggez的上下文环境。
+    /// * `is_initial_pause` - 是否为初始暂停状态。
     ///
     /// # Returns
     ///
     /// 返回一个 `GameResult`，表示绘制操作是否成功。
-    fn draw_pause_message(ctx: &mut Context) -> GameResult {
-        let pause_text = Text::new(
-            TextFragment::new("Game Paused")
-                .color(Color::BLUE)
-                .scale(80.0)
-        );
+    fn draw_pause_message(ctx: &mut Context, is_initial_pause: bool) -> GameResult {
+        let pause_text = if is_initial_pause {
+            Text::new(
+                TextFragment::new("Make sure the screen zoom ratio is 100%.\nClick Start in the upper right corner.")
+                    .color(Color::RED)
+                    .scale(60.0)
+            )
+        } else {
+            Text::new(
+                TextFragment::new("Game Paused")
+                    .color(Color::BLUE)
+                    .scale(80.0)
+            )
+        };
         
         let text_width = pause_text.width(ctx);
         let text_height = pause_text.height(ctx);

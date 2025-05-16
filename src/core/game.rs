@@ -68,6 +68,8 @@ pub struct GameState {
     pause_button_rect: (f32, f32, f32, f32),
     /// 游戏暂停的时间点
     pause_start_time: Option<std::time::Instant>,
+    /// 标记是否为初始暂停状态
+    is_initial_pause: bool,
 }
 
 impl GameState {
@@ -103,9 +105,10 @@ impl GameState {
             shop,
             shovel,
             entity_manager,
-            game_state: crate::core::states::GameState::InGame,
+            game_state: crate::core::states::GameState::Paused,
             pause_button_rect: (950.0, 10.0, 80.0, 40.0), // x, y, width, height
             pause_start_time: None,
+            is_initial_pause: true,
         })
     }
 }
@@ -289,7 +292,8 @@ impl EventHandler for GameState {
             self.show_final_wave,
             self.game_state,
             self.pause_button_rect,
-            &self.shovel
+            &self.shovel,
+            self.is_initial_pause
         )
     }
 
@@ -315,6 +319,7 @@ impl EventHandler for GameState {
                 crate::core::states::GameState::Paused => {
                     // 游戏从暂停恢复正常状态
                     self.game_state = crate::core::states::GameState::InGame;
+                    self.is_initial_pause = false;
                     
                     // 计算暂停持续了多长时间
                     if let Some(pause_time) = self.pause_start_time {
