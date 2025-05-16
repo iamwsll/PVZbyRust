@@ -1,9 +1,10 @@
 [package]
 name = "pvz_rust_wsll"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["1481121704@qq.com"]
 description = "一个用 Rust 实现的植物大战僵尸风格游戏的库和可执行程序。目前基本完成."
+repository = "https://github.com/iamwsll/PVZbyRust"
 license = "MIT"
 
 [lib]
